@@ -10,7 +10,7 @@ function Int(name, {size = 1, bigEndian = true, transform = (value) => value } =
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	let parser = function(buffer) {
+	return function(buffer) {
 		let value = 0;
 
 		// parse int from buffer, we could probably use the buffer functions
@@ -37,9 +37,7 @@ function Int(name, {size = 1, bigEndian = true, transform = (value) => value } =
 			value: transform(value),
 			size,
 		};
-	}
-
-	return parser;
+	};
 }
 
 function Int8(name, {transform = (value) => value } = {}) {

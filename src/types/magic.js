@@ -19,7 +19,7 @@ function Magic(name, {data, encoding = 'ascii'}) {
 		throw new Error('Magic parser only accepts `Buffer` or `String`');
 	}
 
-	let parser = function(buffer) {
+	return function(buffer) {
 		const { value, size } = extractor(buffer);
 
 		// string and buffer need different comparison methods
@@ -35,9 +35,7 @@ function Magic(name, {data, encoding = 'ascii'}) {
 			value: valid,
 			size,
 		};
-	}
-
-	return parser;
+	};
 }
 
 module.exports = Magic;

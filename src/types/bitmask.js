@@ -9,7 +9,7 @@ function Bitmask(name, {size = 1, bitfield}) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	let parser = function(buffer) {
+	return function(buffer) {
 		const result = [];
 		let value = 0;
 
@@ -32,9 +32,7 @@ function Bitmask(name, {size = 1, bitfield}) {
 			value: result,
 			size,
 		};
-	}
-
-	return parser;
+	};
 }
 
 module.exports = Bitmask;

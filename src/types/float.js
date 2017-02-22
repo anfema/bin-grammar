@@ -10,7 +10,7 @@ function Float(name, {size = 4, bigEndian = true, transform = (value) => value }
 		throw new Error('IEEE Floats are either 32 bits or 64 bits long');
 	}
 
-	let parser = function(buffer) {
+	return function(buffer) {
 		let value = 0;
 
 		// we use the default reader functions of node for this
@@ -33,9 +33,7 @@ function Float(name, {size = 4, bigEndian = true, transform = (value) => value }
 			value: transform(value),
 			size,
 		};
-	}
-
-	return parser;
+	};
 }
 
 function Double(name, { bigEndian = true, transform = (value) => value } = {}) {

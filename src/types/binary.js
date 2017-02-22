@@ -10,7 +10,7 @@ const { UInt } = require('./uint');
 //
 // returns: parser function that returns buffer
 function Binary(name, {size, sizeField, sizePrefixed = false, sizePrefixLength = 0, bigEndian = true} = {}) {
-	let parser = function(buffer, parseTree) {
+	return function(buffer, parseTree) {
 		let offset = 0;
 
 		// determine size to copy to result buffer
@@ -37,9 +37,7 @@ function Binary(name, {size, sizeField, sizePrefixed = false, sizePrefixLength =
 			value: result,
 			size: size + offset,
 		};
-	}
-
-	return parser;
+	};
 }
 
 module.exports = Binary;

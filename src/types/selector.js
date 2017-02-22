@@ -6,7 +6,7 @@
 // returns: parser function that returns parsed sub-structure
 
 function Selector(name, { select, field, sizeField }) {
-	let parser = function(buffer, parseTree) {
+	return function(buffer, parseTree) {
 		let size = buffer.length;
 		if (sizeField) {
 			size = parseTree[sizeField];
@@ -16,6 +16,7 @@ function Selector(name, { select, field, sizeField }) {
 
 		for (const { match, struct } of select) {
 			// TODO: buffers are compared by calling `.compare`
+			// TODO: allow size field in case to allow for differing size cases without prefix length
 
 			if (match === parseTree[field]) {
 				// case found apply struct
@@ -45,9 +46,7 @@ function Selector(name, { select, field, sizeField }) {
 			value: null,
 			size,
 		};
-	}
-
-	return parser;
+	};
 }
 
 module.exports = Selector;

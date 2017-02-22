@@ -10,7 +10,7 @@ function Enum(name, {size = 1, choices, bigEndian = true}) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	let parser = function(buffer) {
+	return function(buffer) {
 		let value = 0;
 
 		// parse value
@@ -40,9 +40,7 @@ function Enum(name, {size = 1, choices, bigEndian = true}) {
 			value: null,
 			size,
 		};
-	}
-
-	return parser;
+	};
 }
 
 module.exports = Enum;

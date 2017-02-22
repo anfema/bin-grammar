@@ -9,7 +9,7 @@
 //
 // returns: parser function that returns array of parsed items
 function Loop(name, { struct, repetitions = Infinity, repetitionsField, repetitionsPrefixed = false, repetitionsPrefixLength = 0, repetitionsBigEndian = true }) {
-	let parser = function(buffer, parseTree) {
+	return function(buffer, parseTree) {
 		let offset = 0;
 
 		// determine how many repetitions we want
@@ -54,9 +54,7 @@ function Loop(name, { struct, repetitions = Infinity, repetitionsField, repetiti
 			value: result,
 			size: offset,
 		};
-	}
-
-	return parser;
+	};
 }
 
 module.exports = Loop;

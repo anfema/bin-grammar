@@ -16,7 +16,7 @@ function BinString(name, {size = 0, nullTerminated = false, sizePrefixed = false
 		throw new Error('Invalid string parser invocation, you have to specify `size` or `sizeField` or set `nullTerminated` to `true` or have a size prefix');
 	}
 
-	let parser = function(buffer, parseTree) {
+	return function(buffer, parseTree) {
 		let offset = 0;
 
 		if (sizePrefixed) {
@@ -71,9 +71,7 @@ function BinString(name, {size = 0, nullTerminated = false, sizePrefixed = false
 		} else {
 			throw new Error('Invalid size, `sizeField` not found?');
 		}
-	}
-
-	return parser;
+	};
 }
 
 module.exports = BinString;
