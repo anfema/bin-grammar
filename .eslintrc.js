@@ -1,0 +1,41 @@
+module.exports = {
+ 	root: true,
+ 	parserOptions: {
+ 		ecmaVersion: 6,
+ 		sourceType: 'module',
+ 	},
+ 	parser: 'babel-eslint',
+ 	extends: 'airbnb-base',
+ 	env: {
+ 		es6: true,
+ 	},
+ 	plugins: [
+ 		'babel',
+ 	],
+ 	rules: {
+ 		'comma-dangle': ['error', 'always-multiline'],
+ 		'consistent-this': ['error', 'that'],
+ 		'func-names': 'off',
+ 		'generator-star-spacing': 'off', // fails with async code at the moment, revisit later
+ 		'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+ 		'indent': ['warn', 'tab', { SwitchCase: 1 }],
+ 		'max-len': ['warning', 150],
+ 		'new-cap': ['error', { properties: false }],
+ 		'newline-after-var': 'error',
+ 		'newline-before-return': 'error',
+ 		'newline-per-chained-call': ['error', { 'ignoreChainWithDepth': 2 }],
+ 		'no-comma-dangle': 'off',
+ 		'no-console': ['error', { allow: ['error', 'log'] }],
+ 		'no-debugger': 'error',
+ 		'no-mixed-operators': 'off',
+ 		'no-multiple-empty-lines': ['error', { 'max': 1, }],
+ 		'no-param-reassign': 'off',
+ 		'no-prototype-builtins': 'off',
+ 		'no-tabs': 'off',
+ 		'no-underscore-dangle': 'off',
+		'no-bitwise': 'off',
+ 		'object-curly-spacing': ['error', 'always'],
+ 		'prefer-arrow-callback': ['error', { allowNamedFunctions: true, allowUnboundThis: true }],
+ 		'quote-props': ['error', 'as-needed'],
+ 	},
+};
