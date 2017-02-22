@@ -22,3 +22,5 @@ test('binary_size_prefixed', t => {
 	t.is(result.bin[0], 0x0d);
 	t.is(result.bin[1], 0x0a);
 });
+
+test.todo('Binary: sizeField test');

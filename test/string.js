@@ -81,3 +81,5 @@ test('string_variable_hex_encoded', t => {
 	t.is(result.str.length, 24);
 	t.is(result.str, '48656c6c6f20776f726c6421');
 });
+
+test.todo('BinString: sizeField test');

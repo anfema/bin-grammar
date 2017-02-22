@@ -18,3 +18,5 @@ test('magic_fail', t => {
 
 	t.is(result.magic, false);
 });
+
+test.todo('Magic: string data test');
