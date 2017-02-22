@@ -1,0 +1,35 @@
+{
+  "name": "binparser",
+  "version": "0.1.0",
+  "description": "Binary data parser with a readable interface",
+  "main": "index.js",
+  "author": "Johannes Schriewer <@dunkelstern>",
+  "license": "BSD3",
+  "scripts": {
+    "test": "ava"
+  },
+  "devDependencies": {
+    "ava": "^0.18.0",
+    "babel-eslint": "^7.1.1",
+    "eslint": "^3.10.2",
+    "eslint-config-airbnb-base": "^10.0.1",
+    "eslint-plugin-babel": "^4.0.0",
+    "eslint-plugin-import": "^2.2.0"
+  },
+  "dependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:anfema/js-binparser.git"
+  },
+  "ava": {
+    "source": [
+      "src/**/*.js",
+      "index.js"
+    ],
+    "files": [
+      "test/**/*.js"
+    ],
+    "failFast": false
+  }
+}
