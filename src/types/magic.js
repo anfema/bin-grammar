@@ -1,4 +1,4 @@
-const BinString = require('./string');
+const { BinString } = require('./string');
 const { Binary } = require('./binary');
 
 // Fixed magic string or Buffer, often used for packet sync or file type headers

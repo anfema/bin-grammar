@@ -83,3 +83,5 @@ test('string_variable_hex_encoded', t => {
 });
 
 test.todo('BinString: sizeField test');
+test.todo('ASCIIInteger: test');
+test.todo('ASCIIFloat: test');

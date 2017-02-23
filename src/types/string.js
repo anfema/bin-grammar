@@ -3,15 +3,29 @@ const { UInt } = require('./uint');
 // String
 //
 // size: byte length or 0 if variable length
+// encoding: the encoding the string is in
 // nullTerminated: if size is 0 this defines a variable length string with a zero terminator
 // sizePrefixed: if set it is assumed that the string is prefixed with it's length
 // sizePrefixLength: length of the size prefix
-// sizeField: field in the parse tree that defines the size
 // bigEndian: set big endian encoding for the size prefix
-// encoding: the encoding the string is in
+// sizeField: field in the parse tree that defines the size
+// sizeFieldTransform: transform function applied to the size field before using the value
+// transform: transform function applied before returning the string
 //
-// returns: parser function that returns string (if `nullTerminated` = true, cut off at the first zero)
-function BinString(name, {size = 0, nullTerminated = false, sizePrefixed = false, sizePrefixLength = 0, bigEndian = false, sizeField, encoding = 'ascii'}) {
+// returns: parser function that returns transformed string (if `nullTerminated` = true, cut off at the first zero)
+function BinString(name,
+	{
+		size = 0,
+		encoding = 'ascii',
+		nullTerminated = false,
+		sizePrefixed = false,
+		sizePrefixLength = 0,
+		bigEndian = false,
+		sizeField,
+		sizeFieldTransform = (value) => value,
+		transform = (value) => value
+	}
+) {
 	if ((size === 0) && (nullTerminated === false) && (sizeField === undefined) && (sizePrefixed === false)) {
 		throw new Error('Invalid string parser invocation, you have to specify `size` or `sizeField` or set `nullTerminated` to `true` or have a size prefix');
 	}
@@ -26,7 +40,7 @@ function BinString(name, {size = 0, nullTerminated = false, sizePrefixed = false
 			offset = result.size;
 		}
 		if (sizeField) {
-			size = parseTree[sizeField];
+			size = sizeFieldTransform(parseTree[sizeField]);
 		}
 
 		if (size > 0) {
@@ -43,7 +57,7 @@ function BinString(name, {size = 0, nullTerminated = false, sizePrefixed = false
 
 			return {
 				name,
-				value: buffer.toString(encoding, offset, end),
+				value: transform(buffer.toString(encoding, offset, end)),
 				size: size + offset,
 			};
 		} else if (nullTerminated && !sizePrefixed) {
@@ -58,14 +72,14 @@ function BinString(name, {size = 0, nullTerminated = false, sizePrefixed = false
 
 			return {
 				name,
-				value: buffer.toString(encoding, 0, end),
+				value: transform(buffer.toString(encoding, 0, end)),
 				size: end,
 			};
 		} else if (sizePrefixed) {
 			// zero length string is possible, so return zero string
 			return {
 				name,
-				value: '',
+				value: transform(''),
 				size: offset,
 			}
 		} else {
@@ -74,4 +88,81 @@ function BinString(name, {size = 0, nullTerminated = false, sizePrefixed = false
 	};
 }
 
-module.exports = BinString;
+// ASCII encoded integer (aka. human readable number)
+//
+// size: byte length or 0 if variable length
+// nullTerminated: if size is 0 this defines a variable length string with a zero terminator
+// sizePrefixed: if set it is assumed that the string is prefixed with it's length
+// sizePrefixLength: length of the size prefix
+// bigEndian: set big endian encoding for the size prefix
+// sizeField: field in the parse tree that defines the size
+// sizeFieldTransform: transform function applied to the size field before using the value
+// transform: transform function applied before returning the number
+//
+// returns: parser function that returns transformed number
+function ASCIIInteger(name,
+	{
+		size = 0,
+		nullTerminated = false,
+		sizePrefixed = false,
+		sizePrefixLength = 0,
+		bigEndian = false,
+		sizeField,
+		sizeFieldTransform = (value) => value,
+		transform = (value) => value
+	}
+) {
+	return BinString(name, {
+		size,
+		nullTerminated,
+		sizePrefixed,
+		sizePrefixLength,
+		bigEndian,
+		sizeField,
+		sizeFieldTransform,
+		transform: (value) => transform(parseInt(value)),
+	});
+}
+
+// ASCII encoded float or double (aka. human readable number)
+//
+// size: byte length or 0 if variable length
+// nullTerminated: if size is 0 this defines a variable length string with a zero terminator
+// sizePrefixed: if set it is assumed that the string is prefixed with it's length
+// sizePrefixLength: length of the size prefix
+// bigEndian: set big endian encoding for the size prefix
+// sizeField: field in the parse tree that defines the size
+// sizeFieldTransform: transform function applied to the size field before using the value
+// transform: transform function applied before returning the number
+//
+// returns: parser function that returns transformed number
+function ASCIIFloat(name,
+	{
+		size = 0,
+		nullTerminated = false,
+		sizePrefixed = false,
+		sizePrefixLength = 0,
+		bigEndian = false,
+		sizeField,
+		sizeFieldTransform = (value) => value,
+		transform = (value) => value
+	}
+) {
+	return BinString(name, {
+		size,
+		nullTerminated,
+		sizePrefixed,
+		sizePrefixLength,
+		bigEndian,
+		sizeField,
+		sizeFieldTransform,
+		transform: (value) => transform(parseFloat(value)),
+	});
+}
+
+// export everything
+module.exports = {
+	BinString,
+	ASCIIInteger,
+	ASCIIFloat,
+};

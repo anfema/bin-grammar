@@ -5,11 +5,12 @@ const Enum = require('./enum');
 const { Float, Double } = require('./float');
 const { Int, Int8, Int16, Int32 } = require('./int');
 const Magic = require('./magic');
-const BinString = require('./string');
+const { BinString, ASCIIInteger, ASCIIFloat } = require('./string');
 const { UInt, UInt8, UInt16, UInt32 } = require('./uint');
 const Loop = require('./loop');
 const Selector = require('./selector');
 
+// Why do i have to do this nonsense? -.-
 module.exports = {
 	Binary, BCD,
 	BitMask,
@@ -18,7 +19,7 @@ module.exports = {
 	Float, Double,
 	Int, Int8, Int16, Int32,
 	Magic,
-	BinString,
+	BinString, ASCIIInteger, ASCIIFloat,
 	UInt, UInt8, UInt16, UInt32,
 	Loop,
 	Selector,
