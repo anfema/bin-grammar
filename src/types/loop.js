@@ -8,14 +8,27 @@
 // repetitionsField: field in the parse tree that defines the repetition count
 //
 // returns: parser function that returns array of parsed items
-function Loop(name, { struct, repetitions = Infinity, repetitionsField, repetitionsPrefixed = false, repetitionsPrefixLength = 0, repetitionsBigEndian = true }) {
+function Loop(name,
+	{
+		struct,
+		repetitions = Infinity,
+		repetitionsField,
+		repetitionsPrefixed = false,
+		repetitionsPrefixLength = 0,
+		repetitionsBigEndian = true
+	}
+) {
 	return function(buffer, parseTree) {
 		let offset = 0;
 
 		// determine how many repetitions we want
 		if (repetitionsPrefixed) {
-			const prefixParser = UInt('prefix', { size: repetitionsPrefixLength, bigEndian: repetitionsBigEndian })
+			const prefixParser = UInt('prefix', {
+				size: repetitionsPrefixLength,
+				bigEndian: repetitionsBigEndian
+			});
 			const result = prefixParser(buffer);
+
 			repetitions = result.value;
 			offset = result.size;
 		}
@@ -25,6 +38,7 @@ function Loop(name, { struct, repetitions = Infinity, repetitionsField, repetiti
 
 		// run the loop for the defined sub-struct
 		const result = [];
+
 		for (let i = 0; i < repetitions; i += 1) {
 			const data = buffer.slice(offset, buffer.length);
 			const loopResult = {};
@@ -57,4 +71,5 @@ function Loop(name, { struct, repetitions = Infinity, repetitionsField, repetiti
 	};
 }
 
+// export everything
 module.exports = Loop;

@@ -1,24 +1,36 @@
 // Chunk parser, glorified case selector
 //
-// select: list of case tuples, 1st item: value to match, 2nd item: sub-structure to use
+// select: object for switch cases: match = value to match, struct = sub-struct to parse
 // field: field to check for value
+// sizeField: size field from parse tree
+// sizeFieldTransfrom: transform function to modify the size field value before using it
 //
 // returns: parser function that returns parsed sub-structure
-
-function Selector(name, { select, field, sizeField }) {
+function Selector(name,
+	{
+		select,
+		field,
+		sizeField,
+		sizeFieldTransform = (value) => value,
+	}
+) {
 	return function(buffer, parseTree) {
 		let size = buffer.length;
 		if (sizeField) {
-			size = parseTree[sizeField];
+			size = sizeFieldTransform(parseTree[sizeField]);
 		}
 
 		const data = buffer.slice(0, size);
 
 		for (const { match, struct } of select) {
-			// TODO: buffers are compared by calling `.compare`
-			// TODO: allow size field in case to allow for differing size cases without prefix length
+			let matched = false;
+			if (match instanceof Buffer) {
+				matched = (match.compare(parseTree[field]) === 0);
+			} else {
+				matched = (match === parseTree[field]);
+			}
 
-			if (match === parseTree[field]) {
+			if (matched) {
 				// case found apply struct
 				let offset = 0;
 				const result = {};
@@ -49,4 +61,5 @@ function Selector(name, { select, field, sizeField }) {
 	};
 }
 
+// export everything
 module.exports = Selector;

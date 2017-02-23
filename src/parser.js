@@ -1,6 +1,6 @@
 // Parse a binary buffer
 //
-// definition: array of array, first element = name, second element = type instance
+// definition: array of type parser functions
 // buffer: buffer to parse
 function parse(definition, buffer) {
 	let offset = 0;
@@ -17,4 +17,5 @@ function parse(definition, buffer) {
 	return result;
 }
 
+// export everything
 module.exports = parse;

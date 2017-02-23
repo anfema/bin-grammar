@@ -1,11 +1,17 @@
-// IEEE Float
+// IEEE Float, generic float parser, defaults to single precision
 //
-// size: byte length
-// bigEndian: choose big endian encoding, else little endian encoded
+// size: byte length, defaults to 4 (the IEEE single precision float length)
+// bigEndian: set endian encoding, else little endian encoded
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
-// returns: parser function that returns float
-function Float(name, {size = 4, bigEndian = true, transform = (value) => value } = {}) {
+// returns: parser function that returns a float
+function Float(name,
+	{
+		size = 4,
+		bigEndian = true,
+		transform = (value) => value
+	} = {}
+) {
 	if ((size !== 4) && (size !== 8)) {
 		throw new Error('IEEE Floats are either 32 bits or 64 bits long');
 	}
@@ -36,10 +42,22 @@ function Float(name, {size = 4, bigEndian = true, transform = (value) => value }
 	};
 }
 
-function Double(name, { bigEndian = true, transform = (value) => value } = {}) {
+// IEEE Double, specialized double precision parser
+//
+// bigEndian: set endian encoding, else little endian encoded
+// transform: value transformer function gets the parsed value as parameter, returns new value
+//
+// returns: parser function that returns a double
+function Double(name,
+	{
+		bigEndian = true,
+		transform = (value) => value
+	} = {}
+) {
 	return Float(name, { size: 8, bigEndian, transform });
 }
 
+// export everything
 module.exports = {
 	Float,
 	Double,

@@ -7,7 +7,12 @@ const { Binary } = require('./binary');
 // encoding: if data is a string this defines the string encoding
 //
 // returns: parser function that returns true if magic matches, false if it does not
-function Magic(name, {data, encoding = 'ascii'}) {
+function Magic(name,
+	{
+		data,
+		encoding = 'ascii'
+	}
+) {
 	let extractor;
 
 	// determine how to extract the magic
@@ -38,4 +43,5 @@ function Magic(name, {data, encoding = 'ascii'}) {
 	};
 }
 
+// export everything
 module.exports = Magic;

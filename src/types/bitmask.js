@@ -4,7 +4,12 @@
 // bitfield: Object, key: flag name, value: bit number
 //
 // returns: parser function that returns array of set keys
-function Bitmask(name, {size = 1, bitfield}) {
+function Bitmask(name,
+	{
+		size = 1,
+		bitfield
+	}
+) {
 	if ((size < 1) || (size > 4)) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
@@ -35,4 +40,5 @@ function Bitmask(name, {size = 1, bitfield}) {
 	};
 }
 
+// export everything
 module.exports = Bitmask;

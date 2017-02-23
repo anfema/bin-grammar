@@ -1,11 +1,17 @@
-// Signed Integer (two's complement)
+// Generic Signed Integer (two's complement)
 //
 // size: byte length
 // bigEndian: choose big endian encoding, else little endian encoded
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
-// returns: parser function that returns signed integer
-function Int(name, {size = 1, bigEndian = true, transform = (value) => value } = {}) {
+// returns: parser function that returns transformed signed integer
+function Int(name,
+	{
+		size = 1,
+		bigEndian = true,
+		transform = (value) => value
+	} = {}
+) {
 	if ((size < 1) || (size > 4)) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
@@ -40,18 +46,46 @@ function Int(name, {size = 1, bigEndian = true, transform = (value) => value } =
 	};
 }
 
-function Int8(name, {transform = (value) => value } = {}) {
+// 8 Bit Signed Integer (two's complement)
+//
+// transform: value transformer function gets the parsed value as parameter, returns new value
+//
+// returns: parser function that returns transformed signed integer
+function Int8(name,	{ transform = (value) => value } = {}) {
 	return Int(name, { size: 1, transform});
 }
 
-function Int16(name, { bigEndian = true, transform = (value) => value } = {}) {
+// 16 Bit Signed Integer (two's complement)
+//
+// bigEndian: choose big endian encoding, else little endian encoded
+// transform: value transformer function gets the parsed value as parameter, returns new value
+//
+// returns: parser function that returns transformed signed integer
+function Int16(name,
+	{
+		bigEndian = true,
+		transform = (value) => value
+	} = {}
+) {
 	return Int(name, { size: 2, bigEndian, transform});
 }
 
-function Int32(name, { bigEndian = true, transform = (value) => value } = {}) {
+// 32 Bit Signed Integer (two's complement)
+//
+// bigEndian: choose big endian encoding, else little endian encoded
+// transform: value transformer function gets the parsed value as parameter, returns new value
+//
+// returns: parser function that returns transformed signed integer
+function Int32(name,
+	{
+		bigEndian = true,
+		transform = (value) => value
+	} = {}
+) {
 	return Int(name, { size: 4, bigEndian, transform});
 }
 
+// export everything
 module.exports = {
 	Int,
 	Int8,
