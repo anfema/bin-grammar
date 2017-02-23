@@ -1,6 +1,6 @@
 const { Binary, BCD } = require('./binary');
 const BitMask = require('./bitmask');
-const BitStruct = require('./bitstruct');
+const { BitStruct, BitFlag, BitInt, BitUInt, BitEnum, BitBitMask } = require('./bitstruct');
 const Enum = require('./enum');
 const { Float, Double } = require('./float');
 const { Int, Int8, Int16, Int32 } = require('./int');
@@ -14,7 +14,7 @@ const Selector = require('./selector');
 module.exports = {
 	Binary, BCD,
 	BitMask,
-	BitStruct,
+	BitStruct, BitFlag, BitInt, BitUInt, BitEnum, BitBitMask,
 	Enum,
 	Float, Double,
 	Int, Int8, Int16, Int32,
@@ -28,5 +28,4 @@ module.exports = {
 
 // TODO:
 //
-// - BitStruct
 // - CRCs

@@ -2,7 +2,7 @@ const BinParser = require('./src/parser.js');
 const {
 	Binary, BCD,
 	BitMask,
-	BitStruct,
+	BitStruct, BitFlag, BitInt, BitUInt, BitEnum, BitBitMask,
 	Enum,
 	Float, Double,
 	Int, Int8, Int16, Int32,
@@ -17,7 +17,7 @@ module.exports = {
 	BinParser,
 	Binary, BCD,
 	BitMask,
-	BitStruct,
+	BitStruct, BitFlag, BitInt, BitUInt, BitEnum, BitBitMask,
 	Enum,
 	Float, Double,
 	Int, Int8, Int16, Int32,
