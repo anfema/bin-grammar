@@ -38,9 +38,9 @@ function Selector(name,
 				for (item of struct) {
 					const slice = data.slice(offset, data.length);
 
-					const { name: itemName, value, size: itemSize } = item(slice, result);
-					result[itemName] = value;
-					offset += itemSize;
+					const r = item(slice, result);
+					result[r.name] = r.value;
+					offset += r.size;
 				}
 
 				// return result

@@ -48,9 +48,9 @@ function Loop(name,
 			for (item of struct) {
 				const slice = data.slice(parserOffset, data.length);
 
-				const { name: itemName, value, size } = item(slice, loopResult);
-				loopResult[itemName] = value;
-				parserOffset += size;
+				const r = item(slice, loopResult);
+				loopResult[r.name] = r.value;
+				parserOffset += r.size;
 			}
 
 			result.push(loopResult);
