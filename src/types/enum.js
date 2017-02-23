@@ -1,11 +1,17 @@
 // Enumeration of possible values
 //
 // size: byte length
-// bigEndian: choose big endian encoding, else little endian encoded
 // choices: Object, key: choice name, value: value to check for
+// bigEndian: choose big endian encoding, else little endian encoded
 //
 // returns: parser function that returns key of choice or `null` if not in the enum
-function Enum(name, {size = 1, choices, bigEndian = true}) {
+function Enum(name,
+	{
+		size = 1,
+		choices,
+		bigEndian = true
+	}
+) {
 	if ((size < 1) || (size > 4)) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
@@ -43,4 +49,5 @@ function Enum(name, {size = 1, choices, bigEndian = true}) {
 	};
 }
 
+// export everything
 module.exports = Enum;
