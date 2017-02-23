@@ -1,5 +1,5 @@
 const test = require('ava');
-const { BinParser, Binary, Enum, Magic, UInt32, UInt8, BinString, Loop, Selector } = require('../index');
+const { BinParser, Binary, Enum, Magic, UInt32, UInt8, BinString, Loop, Selector, CRC32 } = require('../index');
 
 //
 // chunk content parsers
@@ -34,17 +34,18 @@ const iendParser = [ ];
 
 const chunkParser = [
 	UInt32('length'),
-	BinString('name', { size: 4 }),
-	Selector('data', {
-		sizeField: 'length',
-		field: 'name',
-		select: [
-			{ match: 'IHDR', struct: ihdrParser },
-			{ match: 'IDAT', struct: idatParser },
-			{ match: 'IEND', struct: iendParser },
-		],
-	}),
-	Binary('crc', { size: 4 }),
+	CRC32('crc', [
+		BinString('name', { size: 4 }),
+		Selector('data', {
+			sizeField: 'length',
+			field: 'name',
+			select: [
+				{ match: 'IHDR', struct: ihdrParser },
+				{ match: 'IDAT', struct: idatParser },
+				{ match: 'IEND', struct: iendParser },
+			],
+		}),
+	]),
 ];
 
 //
@@ -78,5 +79,12 @@ test('png_parse', t => {
 	t.is(result.chunks[0].data.compressionMethod, 'deflate');
 	t.is(result.chunks[0].data.filterMethod, 'adaptive');
 	t.is(result.chunks[0].data.interlaceMethod, 'none');
-	t.is(result.chunks[0].crc.compare(Buffer.from('376ef924', 'hex')), 0);
+	t.is(result.chunks[0].crc, true);
+	t.is(result.chunks[1].name, 'IDAT');
+	t.is(result.chunks[1].length, 16);
+	t.is(result.chunks[1].data.data.length, 16);
+	t.is(result.chunks[1].crc, true);
+	t.is(result.chunks[2].name, 'IEND');
+	t.is(result.chunks[2].length, 0);
+	t.is(result.chunks[2].crc, true);
 });

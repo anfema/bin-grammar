@@ -17,6 +17,7 @@
     "eslint-plugin-import": "^2.2.0"
   },
   "dependencies": {
+    "crc": "^3.4.4"
   },
   "repository": {
     "type": "git",

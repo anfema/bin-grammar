@@ -9,6 +9,7 @@ const { BinString, ASCIIInteger, ASCIIFloat } = require('./string');
 const { UInt, UInt8, UInt16, UInt32 } = require('./uint');
 const Loop = require('./loop');
 const Selector = require('./selector');
+const { CRC, CRC32, CRC24, CRC16, CRC16_CCITT, CRC16_Modbus, CRC16_Kermit, CRC16_XModem, CRC8, CRC8_1Wire, CRC8_XOR } = require('./crc');
 
 // Why do i have to do this nonsense? -.-
 module.exports = {
@@ -23,9 +24,5 @@ module.exports = {
 	UInt, UInt8, UInt16, UInt32,
 	Loop,
 	Selector,
+	CRC, CRC32, CRC24, CRC16, CRC16_CCITT, CRC16_Modbus, CRC16_Kermit, CRC16_XModem, CRC8, CRC8_1Wire, CRC8_XOR,
 };
-
-
-// TODO:
-//
-// - CRCs
