@@ -24,3 +24,4 @@ test('binary_size_prefixed', t => {
 });
 
 test.todo('Binary: sizeField test');
+test.todo('Binary: BCD test');

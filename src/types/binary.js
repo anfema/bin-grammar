@@ -2,14 +2,26 @@ const { UInt } = require('./uint');
 
 // Binary data
 //
-// size: byte length or 0 if variable length
-// sizePrefixed: if set it is assumed that the data is prefixed with it's length
+// size: byte length or `undefined` if variable length
 // sizeField: if set use this field name from the parse tree for the size of this data item
+// sizePrefixed: if set it is assumed that the data is prefixed with it's length
 // sizePrefixLength: length of the size prefix
 // bigEndian: set big endian encoding for the size prefix
+// sizeFieldTransform: transform function to call before using the value of the size field
+// transform: result value transform function to call on the data before returning it as result
 //
-// returns: parser function that returns buffer
-function Binary(name, {size, sizeField, sizePrefixed = false, sizePrefixLength = 0, bigEndian = true} = {}) {
+// returns: parser function that returns transformed buffer
+function Binary(name,
+	{
+		size,
+		sizeField,
+		sizePrefixed = false,
+		sizePrefixLength = 0,
+		bigEndian = true,
+		sizeFieldTransform = (value) => value,
+		transform = (value) => value
+	} = {}
+) {
 	return function(buffer, parseTree) {
 		let offset = 0;
 
@@ -21,7 +33,7 @@ function Binary(name, {size, sizeField, sizePrefixed = false, sizePrefixLength =
 			offset = result.size;
 		}
 		if (sizeField) {
-			size = parseTree[sizeField];
+			size = sizeFieldTransform(parseTree[sizeField]);
 		}
 		if (size === undefined) {
 			size = buffer.length;
@@ -34,10 +46,57 @@ function Binary(name, {size, sizeField, sizePrefixed = false, sizePrefixLength =
 		// return result
 		return {
 			name,
-			value: result,
+			value: transform(result),
 			size: size + offset,
 		};
 	};
 }
 
-module.exports = Binary;
+// Packed BCD number
+//
+// Example: 0x12 0x34 => 1234
+//
+// size: byte length or `undefined` if variable length
+// sizeField: if set use this field name from the parse tree for the size of this data item
+// sizePrefixed: if set it is assumed that the data is prefixed with it's length
+// sizePrefixLength: length of the size prefix
+// bigEndian: set big endian encoding for the size prefix
+// sizeFieldTransform: transform function to call before using the value of the size field
+// transform: result value transform function to call on the data before returning it as result
+//
+// returns: parser function that returns transformed BCD number
+function BCD(name,
+	{
+		size,
+		sizeField,
+		sizePrefixed = false,
+		sizePrefixLength = 0,
+		bigEndian = true,
+		sizeFieldTransform = (value) => value,
+		transform = (value) => value
+	}
+) {
+	return BinString(name, {
+		size,
+		sizeField,
+		sizePrefixed,
+		sizePrefixLength,
+		sizeFieldTransform,
+		bigEndian,
+		transform: (value) => {
+			let result = 0;
+
+			for (const character of value) {
+				result = result * 100 + (((character & 0xf0) >> 8) * 10 + (character & 0x0f));
+			}
+
+			return transform(result);
+		},
+	});
+}
+
+// export everything
+module.exports = {
+	Binary,
+	BCD,
+};

@@ -1,4 +1,4 @@
-const Binary = require('./binary');
+const { Binary, BCD } = require('./binary');
 const BitMask = require('./bitmask');
 const BitStruct = require('./bitstruct');
 const Enum = require('./enum');
@@ -11,7 +11,7 @@ const Loop = require('./loop');
 const Selector = require('./selector');
 
 module.exports = {
-	Binary,
+	Binary, BCD,
 	BitMask,
 	BitStruct,
 	Enum,
@@ -28,5 +28,4 @@ module.exports = {
 // TODO:
 //
 // - BitStruct
-// - BCD Numbers
 // - CRCs

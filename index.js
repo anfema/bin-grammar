@@ -1,6 +1,6 @@
 const BinParser = require('./src/parser.js');
 const {
-	Binary,
+	Binary, BCD,
 	BitMask,
 	BitStruct,
 	Enum,
@@ -15,7 +15,7 @@ const {
 
 module.exports = {
 	BinParser,
-	Binary,
+	Binary, BCD,
 	BitMask,
 	BitStruct,
 	Enum,
