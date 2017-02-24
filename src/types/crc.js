@@ -1,12 +1,12 @@
-var { BinString } = require('./string');
-var crc = require('crc');
+const { BinString } = require('./string');
+const crc = require('crc');
 
 // internal function, just xors all bytes together
 function crc8_xor(buffer) {
 	let result = 0;
 
-	for (character of buffer) {
-		result = result ^ character;
+	for (const character of buffer) {
+		result ^= character;
 	}
 
 	return result;
@@ -22,21 +22,20 @@ function crc8_xor(buffer) {
 //
 // returns: parser function to calculate and validate a CRC checksum (returns true or false)
 function CRC(name, elements, crcSize, crcFunction) {
-	return function(buffer, parseTree) {
-
+	return function (buffer, parseTree) {
 		let offset = 0;
 
 		// execute all elements, add to toplevel parse tree (yeah some kind of hack, i know)
-		for (item of elements) {
+		for (const item of elements) {
 			const slice = buffer.slice(offset, buffer.length);
-
 			const r = item(slice, parseTree);
+
 			parseTree[r.name] = r.value;
 			offset += r.size;
 		}
 
 		// read crc
-		const crcParser = BinString('crc', { size: crcSize, encoding: 'hex' })
+		const crcParser = BinString('crc', { size: crcSize, encoding: 'hex' });
 		const r = crcParser(buffer.slice(offset, offset + crcSize));
 		const checksum = r.value;
 
@@ -50,7 +49,7 @@ function CRC(name, elements, crcSize, crcFunction) {
 			value: match,
 			size: offset + crcSize,
 		};
-	}
+	};
 }
 
 // CRC 32 checksumming function

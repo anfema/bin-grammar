@@ -14,8 +14,9 @@ function Selector(name,
 		sizeFieldTransform = (value) => value,
 	}
 ) {
-	return function(buffer, parseTree) {
+	return function (buffer, parseTree) {
 		let size = buffer.length;
+
 		if (sizeField) {
 			size = sizeFieldTransform(parseTree[sizeField]);
 		}
@@ -24,6 +25,7 @@ function Selector(name,
 
 		for (const { match, struct } of select) {
 			let matched = false;
+
 			if (match instanceof Buffer) {
 				matched = (match.compare(parseTree[field]) === 0);
 			} else {
@@ -35,10 +37,10 @@ function Selector(name,
 				let offset = 0;
 				const result = {};
 
-				for (item of struct) {
+				for (const item of struct) {
 					const slice = data.slice(offset, data.length);
-
 					const r = item(slice, result);
+
 					result[r.name] = r.value;
 					offset += r.size;
 				}
@@ -48,7 +50,7 @@ function Selector(name,
 					name,
 					value: result,
 					size: offset,
-				}
+				};
 			}
 		}
 

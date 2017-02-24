@@ -15,10 +15,10 @@ function Loop(name,
 		repetitionsField,
 		repetitionsPrefixed = false,
 		repetitionsPrefixLength = 0,
-		repetitionsBigEndian = true
+		repetitionsBigEndian = true,
 	}
 ) {
-	return function(buffer, parseTree) {
+	return function (buffer, parseTree) {
 		let offset = 0;
 
 		// determine how many repetitions we want
@@ -45,10 +45,10 @@ function Loop(name,
 			let parserOffset = 0;
 
 			// loop over items in the sub struct
-			for (item of struct) {
+			for (const item of struct) {
 				const slice = data.slice(parserOffset, data.length);
-
 				const r = item(slice, loopResult);
+
 				loopResult[r.name] = r.value;
 				parserOffset += r.size;
 			}

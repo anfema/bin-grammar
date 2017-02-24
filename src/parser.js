@@ -6,10 +6,10 @@ function parse(definition, buffer) {
 	let offset = 0;
 	const result = {};
 
-	for (item of definition) {
+	for (const item of definition) {
 		const slice = buffer.slice(offset, buffer.length);
-
 		const r = item(slice, result);
+
 		result[r.name] = r.value;
 		offset += r.size;
 	}

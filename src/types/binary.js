@@ -18,17 +18,18 @@ function Binary(name,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
 		bigEndian = true,
-		sizeFieldTransform = (value) => value,
-		transform = (value) => value
+		sizeFieldTransform = value => value,
+		transform = value => value,
 	} = {}
 ) {
-	return function(buffer, parseTree) {
+	return function (buffer, parseTree) {
 		let offset = 0;
 
 		// determine size to copy to result buffer
 		if (sizePrefixed) {
-			const prefixParser = UInt('prefix', { size: sizePrefixLength, bigEndian })
+			const prefixParser = UInt('prefix', { size: sizePrefixLength, bigEndian });
 			const result = prefixParser(buffer);
+
 			size = result.value;
 			offset = result.size;
 		}
@@ -41,6 +42,7 @@ function Binary(name,
 
 		// just copy data to result
 		const result = new Buffer(size);
+
 		buffer.copy(result, 0, offset, size + offset);
 
 		// return result
@@ -72,11 +74,11 @@ function BCD(name,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
 		bigEndian = true,
-		sizeFieldTransform = (value) => value,
-		transform = (value) => value
+		sizeFieldTransform = value => value,
+		transform = value => value,
 	}
 ) {
-	return BinString(name, {
+	return Binary(name, {
 		size,
 		sizeField,
 		sizePrefixed,
@@ -87,7 +89,7 @@ function BCD(name,
 			let result = 0;
 
 			for (const character of value) {
-				result = result * 100 + (((character & 0xf0) >> 8) * 10 + (character & 0x0f));
+				result = result * 100 + (((character & 0xf0) >> 4) * 10 + (character & 0x0f));
 			}
 
 			return transform(result);

@@ -8,13 +8,13 @@ const { UInt } = require('./uint');
 // elements: array of sub elements, only `Bit` elements allowed
 //
 // returns: parser function that returns an object with the destructured bits
-function BitStruct(name, {size = 1, sizeField, sizeFieldTransform = (value) => value, elements}) {
+function BitStruct(name, { size = 1, sizeField, sizeFieldTransform = (value) => value, elements }) {
 	return function (buffer, parseTree) {
 		if (sizeField) {
 			size = sizeFieldTransform(parseTree[sizeField]);
 		}
 
-		const parser = UInt('parser', { size })
+		const parser = UInt('parser', { size });
 		const parsed = parser(buffer.slice(0, size));
 		const data = parsed.value;
 
@@ -23,6 +23,7 @@ function BitStruct(name, {size = 1, sizeField, sizeFieldTransform = (value) => v
 
 		for (item of elements) {
 			const r = item(data, (size * 8) - offset);
+
 			result[r.name] = r.value;
 			offset += r.size;
 		}
@@ -32,7 +33,7 @@ function BitStruct(name, {size = 1, sizeField, sizeFieldTransform = (value) => v
 			value: result,
 			size,
 		};
-	}
+	};
 }
 
 // One bit flag
@@ -41,15 +42,15 @@ function BitStruct(name, {size = 1, sizeField, sizeFieldTransform = (value) => v
 //
 // returns: parser function that returns a bool
 function BitFlag(name) {
-	return function(data, offset) {
+	return function (data, offset) {
 		const result = ((data & (1 << (offset - 1))) !== 0);
 
 		return {
 			name,
 			value: result,
 			size: 1,
-		}
-	}
+		};
+	};
 }
 
 // Sub-byte sized signed integer
@@ -60,7 +61,7 @@ function BitFlag(name) {
 //
 // returns: parser function that returns a signed integer
 function BitInt(name, { size = 2, transform = (value) => value }) {
-	return function(data, offset) {
+	return function (data, offset) {
 		let mask = 0;
 
 		for (let i = 0; i < size; i += 1) {
@@ -71,15 +72,15 @@ function BitInt(name, { size = 2, transform = (value) => value }) {
 
 		// two's complement (yeah magic)
 		if (result & (1 << (size - 1))) {
-			result = - ((~result & mask) + 1);
+			result = -((~result & mask) + 1);
 		}
 
 		return {
 			name,
 			value: transform(result),
 			size,
-		}
-	}
+		};
+	};
 }
 
 // Sub-byte sized unsigned integer
@@ -90,7 +91,7 @@ function BitInt(name, { size = 2, transform = (value) => value }) {
 //
 // returns: parser function that returns a unsigned integer
 function BitUInt(name, { size = 2, transform = (value) => value }) {
-	return function(data, offset) {
+	return function (data, offset) {
 		let mask = 0;
 
 		for (let i = 0; i < size; i += 1) {
@@ -103,8 +104,8 @@ function BitUInt(name, { size = 2, transform = (value) => value }) {
 			name,
 			value: transform(result),
 			size,
-		}
-	}
+		};
+	};
 }
 
 // Sub-byte sized enum
@@ -115,7 +116,7 @@ function BitUInt(name, { size = 2, transform = (value) => value }) {
 //
 // returns: parser function that returns a string of the matching enum case or `null`
 function BitEnum(name, { size = 2, choices }) {
-	return function(data, offset) {
+	return function (data, offset) {
 		let mask = 0;
 
 		for (let i = 0; i < size; i += 1) {
@@ -125,8 +126,9 @@ function BitEnum(name, { size = 2, choices }) {
 		const value = (data >> (offset - size)) & mask;
 
 		// check which enum case matches
-		for (let key of Object.keys(choices)) {
+		for (const key of Object.keys(choices)) {
 			const val = choices[key];
+
 			if (value === val) {
 				return {
 					name,
@@ -140,8 +142,8 @@ function BitEnum(name, { size = 2, choices }) {
 			name,
 			value: null,
 			size,
-		}
-	}
+		};
+	};
 }
 
 // Sub-byte sized bitmask
@@ -152,7 +154,7 @@ function BitEnum(name, { size = 2, choices }) {
 //
 // returns: parser function that returns an array of strings of set bits
 function BitBitMask(name, { size = 2, bitfield }) {
-	return function(data, offset) {
+	return function (data, offset) {
 		const result = [];
 		let mask = 0;
 
@@ -163,8 +165,9 @@ function BitBitMask(name, { size = 2, bitfield }) {
 		const value = (data >> (offset - size)) & mask;
 
 		// determine which bits have been set
-		for (let key of Object.keys(bitfield)) {
+		for (const key of Object.keys(bitfield)) {
 			const val = bitfield[key];
+
 			if (value & 1 << (size - val - 1)) {
 				result.push(key);
 			}
@@ -174,8 +177,8 @@ function BitBitMask(name, { size = 2, bitfield }) {
 			name,
 			value: result,
 			size,
-		}
-	}
+		};
+	};
 }
 
 // export everything

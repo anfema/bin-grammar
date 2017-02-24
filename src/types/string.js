@@ -22,15 +22,15 @@ function BinString(name,
 		sizePrefixLength = 0,
 		bigEndian = false,
 		sizeField,
-		sizeFieldTransform = (value) => value,
-		transform = (value) => value
+		sizeFieldTransform = value => value,
+		transform = value => value,
 	}
 ) {
 	if ((size === 0) && (nullTerminated === false) && (sizeField === undefined) && (sizePrefixed === false)) {
 		throw new Error('Invalid string parser invocation, you have to specify `size` or `sizeField` or set `nullTerminated` to `true` or have a size prefix');
 	}
 
-	return function(buffer, parseTree) {
+	return function (buffer, parseTree) {
 		let offset = 0;
 
 		if (sizePrefixed) {
@@ -46,6 +46,7 @@ function BinString(name,
 		if (size > 0) {
 			// cut of at first zero byte if `nullTerminated` is set
 			let end = size + offset;
+
 			if (nullTerminated) {
 				for(let i = offset; i < size + offset; i += 1) {
 					if (buffer[i] === 0x00) {
@@ -63,6 +64,7 @@ function BinString(name,
 		} else if (nullTerminated && !sizePrefixed) {
 			// variable length string with no size hint
 			let end = buffer.length;
+
 			for(let i = 0; i < buffer.length; i += 1) {
 				if (buffer[i] === 0x00) {
 					end = i;
@@ -81,10 +83,9 @@ function BinString(name,
 				name,
 				value: transform(''),
 				size: offset,
-			}
-		} else {
-			throw new Error('Invalid size, `sizeField` not found?');
+			};
 		}
+		throw new Error('Invalid size, `sizeField` not found?');
 	};
 }
 
@@ -108,8 +109,8 @@ function ASCIIInteger(name,
 		sizePrefixLength = 0,
 		bigEndian = false,
 		sizeField,
-		sizeFieldTransform = (value) => value,
-		transform = (value) => value
+		sizeFieldTransform = value => value,
+		transform = value => value,
 	}
 ) {
 	return BinString(name, {
@@ -120,7 +121,7 @@ function ASCIIInteger(name,
 		bigEndian,
 		sizeField,
 		sizeFieldTransform,
-		transform: (value) => transform(parseInt(value)),
+		transform: value => transform(parseInt(value, 10)),
 	});
 }
 
@@ -144,8 +145,8 @@ function ASCIIFloat(name,
 		sizePrefixLength = 0,
 		bigEndian = false,
 		sizeField,
-		sizeFieldTransform = (value) => value,
-		transform = (value) => value
+		sizeFieldTransform = value => value,
+		transform = value => value,
 	}
 ) {
 	return BinString(name, {
@@ -156,7 +157,7 @@ function ASCIIFloat(name,
 		bigEndian,
 		sizeField,
 		sizeFieldTransform,
-		transform: (value) => transform(parseFloat(value)),
+		transform: value => transform(parseFloat(value)),
 	});
 }
 

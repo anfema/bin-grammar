@@ -9,14 +9,14 @@ function Enum(name,
 	{
 		size = 1,
 		choices,
-		bigEndian = true
+		bigEndian = true,
 	}
 ) {
 	if ((size < 1) || (size > 4)) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function(buffer) {
+	return function (buffer) {
 		let value = 0;
 
 		// parse value
@@ -29,8 +29,9 @@ function Enum(name,
 		}
 
 		// check which enum case matches
-		for (let key of Object.keys(choices)) {
+		for (const key of Object.keys(choices)) {
 			const val = choices[key];
+
 			if (value === val) {
 				return {
 					name,

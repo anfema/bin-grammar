@@ -10,7 +10,7 @@ const { Binary } = require('./binary');
 function Magic(name,
 	{
 		data,
-		encoding = 'ascii'
+		encoding = 'ascii',
 	}
 ) {
 	let extractor;
@@ -24,7 +24,7 @@ function Magic(name,
 		throw new Error('Magic parser only accepts `Buffer` or `String`');
 	}
 
-	return function(buffer) {
+	return function (buffer) {
 		const { value, size } = extractor(buffer);
 
 		// string and buffer need different comparison methods

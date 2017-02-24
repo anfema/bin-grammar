@@ -9,14 +9,14 @@ function Int(name,
 	{
 		size = 1,
 		bigEndian = true,
-		transform = (value) => value
+		transform = value => value,
 	} = {}
 ) {
 	if ((size < 1) || (size > 4)) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function(buffer) {
+	return function (buffer) {
 		let value = 0;
 
 		// parse int from buffer, we could probably use the buffer functions
@@ -32,10 +32,11 @@ function Int(name,
 		// two's complement (yeah magic)
 		if (value & (0x80 << ((size - 1) * 8))) {
 			let mask = 0;
+
 			for (let i = 0; i < size; i += 1) {
 				mask |= (0xff << (i * 8));
 			}
-			value = - ((~value & mask) + 1);
+			value = -((~value & mask) + 1);
 		}
 
 		return {
@@ -51,8 +52,8 @@ function Int(name,
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns transformed signed integer
-function Int8(name,	{ transform = (value) => value } = {}) {
-	return Int(name, { size: 1, transform});
+function Int8(name,	{ transform = value => value } = {}) {
+	return Int(name, { size: 1, transform });
 }
 
 // 16 Bit Signed Integer (two's complement)
@@ -64,10 +65,10 @@ function Int8(name,	{ transform = (value) => value } = {}) {
 function Int16(name,
 	{
 		bigEndian = true,
-		transform = (value) => value
+		transform = value => value,
 	} = {}
 ) {
-	return Int(name, { size: 2, bigEndian, transform});
+	return Int(name, { size: 2, bigEndian, transform });
 }
 
 // 32 Bit Signed Integer (two's complement)
@@ -79,10 +80,10 @@ function Int16(name,
 function Int32(name,
 	{
 		bigEndian = true,
-		transform = (value) => value
+		transform = value => value,
 	} = {}
 ) {
-	return Int(name, { size: 4, bigEndian, transform});
+	return Int(name, { size: 4, bigEndian, transform });
 }
 
 // export everything

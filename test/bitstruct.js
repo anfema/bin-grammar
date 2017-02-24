@@ -1,7 +1,7 @@
 const test = require('ava');
 const { BinParser, BitStruct, BitFlag, BitInt, BitUInt, BitEnum, BitBitMask } = require('../index');
 
-test('bit_flags', t => {
+test('bit_flags', (t) => {
 	const buffer = Buffer.from('05', 'hex');
 	const result = BinParser([
 		BitStruct('bit', {
@@ -15,8 +15,8 @@ test('bit_flags', t => {
 				BitFlag('bit6'),
 				BitFlag('bit7'),
 				BitFlag('bit8'),
-			]
-		})
+			],
+		}),
 	], buffer);
 
 	t.is(result.bit.bit1, false);
@@ -29,7 +29,7 @@ test('bit_flags', t => {
 	t.is(result.bit.bit8, true);
 });
 
-test('bit_int', t => {
+test('bit_int', (t) => {
 	const buffer = Buffer.from('5f', 'hex');
 	const result = BinParser([
 		BitStruct('bit', {
@@ -37,15 +37,15 @@ test('bit_int', t => {
 			elements: [
 				BitInt('int1', { size: 4 }),
 				BitInt('int2', { size: 4 }),
-			]
-		})
+			],
+		}),
 	], buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.int2, -1);
 });
 
-test('bit_uint', t => {
+test('bit_uint', (t) => {
 	const buffer = Buffer.from('5f', 'hex');
 	const result = BinParser([
 		BitStruct('bit', {
@@ -53,15 +53,15 @@ test('bit_uint', t => {
 			elements: [
 				BitUInt('int1', { size: 4 }),
 				BitUInt('int2', { size: 4 }),
-			]
-		})
+			],
+		}),
 	], buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.int2, 15);
 });
 
-test('bit_enum', t => {
+test('bit_enum', (t) => {
 	const buffer = Buffer.from('5f', 'hex');
 	const result = BinParser([
 		BitStruct('bit', {
@@ -75,15 +75,15 @@ test('bit_enum', t => {
 						all: 15,
 					},
 				}),
-			]
-		})
+			],
+		}),
 	], buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.enum, 'all');
 });
 
-test('bit_bitmask', t => {
+test('bit_bitmask', (t) => {
 	const buffer = Buffer.from('53', 'hex');
 	const result = BinParser([
 		BitStruct('bit', {
@@ -99,8 +99,8 @@ test('bit_bitmask', t => {
 						bit3: 3,
 					},
 				}),
-			]
-		})
+			],
+		}),
 	], buffer);
 
 	t.is(result.bit.int1, 5);
@@ -110,7 +110,7 @@ test('bit_bitmask', t => {
 });
 
 
-test('bit_integration', t => {
+test('bit_integration', (t) => {
 	const buffer = Buffer.from('53f0', 'hex');
 	const result = BinParser([
 		BitStruct('bit', {
@@ -134,8 +134,8 @@ test('bit_integration', t => {
 					},
 				}),
 				BitInt('int2', { size: 6 }),
-			]
-		})
+			],
+		}),
 	], buffer);
 
 	t.is(result.bit.int1, 5);

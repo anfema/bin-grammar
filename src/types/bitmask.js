@@ -7,14 +7,14 @@
 function Bitmask(name,
 	{
 		size = 1,
-		bitfield
+		bitfield,
 	}
 ) {
 	if ((size < 1) || (size > 4)) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function(buffer) {
+	return function (buffer) {
 		const result = [];
 		let value = 0;
 
@@ -26,6 +26,7 @@ function Bitmask(name,
 		// determine which bits have been set
 		for (let key of Object.keys(bitfield)) {
 			const val = bitfield[key];
+
 			if (value & 1 << (size * 8 - val - 1)) {
 				result.push(key);
 			}

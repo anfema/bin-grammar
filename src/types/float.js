@@ -9,14 +9,14 @@ function Float(name,
 	{
 		size = 4,
 		bigEndian = true,
-		transform = (value) => value
+		transform = value => value,
 	} = {}
 ) {
 	if ((size !== 4) && (size !== 8)) {
 		throw new Error('IEEE Floats are either 32 bits or 64 bits long');
 	}
 
-	return function(buffer) {
+	return function (buffer) {
 		let value = 0;
 
 		// we use the default reader functions of node for this
@@ -51,7 +51,7 @@ function Float(name,
 function Double(name,
 	{
 		bigEndian = true,
-		transform = (value) => value
+		transform = value => value,
 	} = {}
 ) {
 	return Float(name, { size: 8, bigEndian, transform });

@@ -16,17 +16,17 @@ const ihdrParser = [
 		indexedColor: 3,
 		grayscaleWithAlpha: 4,
 		trueColorWithAlpha: 6
-	}}),
+	} }),
 	Enum('compressionMethod', { choices: { deflate: 0 }}),
 	Enum('filterMethod', { choices: { adaptive: 0 }}),
 	Enum('interlaceMethod', { choices: { none: 0, adam7: 1 }}),
 ]
 
 // binary image data
-const idatParser = [ Binary('data') ];
+const idatParser = [Binary('data')];
 
 // no content
-const iendParser = [ ];
+const iendParser = [];
 
 //
 // chunk parser
@@ -65,7 +65,7 @@ const buffer = Buffer.from(
 	'hex'
 );
 
-test('png_parse', t => {
+test('png_parse', (t) => {
 	const result = BinParser(pngParser, buffer);
 
 	t.is(result.magic, true);
