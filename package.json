@@ -1,10 +1,10 @@
 {
-  "name": "binparser",
-  "version": "0.1.0",
+  "name": "bin-grammar",
+  "version": "1.0.0",
   "description": "Binary data parser with a readable interface",
   "main": "index.js",
   "author": "Johannes Schriewer <@dunkelstern>",
-  "license": "BSD3",
+  "license": "BSD-3-Clause",
   "scripts": {
     "test": "ava"
   },
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:anfema/js-binparser.git"
+    "url": "git@github.com:anfema/bin-grammar.git"
   },
   "ava": {
     "source": [

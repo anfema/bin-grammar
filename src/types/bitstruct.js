@@ -5,6 +5,8 @@ const { UInt } = require('./uint');
 // When using this all sizes will be measured in bits instead of bytes
 //
 // size: byte length of this bit struct
+// sizeField: size field from the parse tree
+// sizeFieldTransform: transform function to apply before using the value of `sizeField`
 // elements: array of sub elements, only `Bit` elements allowed
 //
 // returns: parser function that returns an object with the destructured bits

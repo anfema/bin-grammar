@@ -17,9 +17,9 @@ const ihdrParser = [
 		grayscaleWithAlpha: 4,
 		trueColorWithAlpha: 6
 	} }),
-	Enum('compressionMethod', { choices: { deflate: 0 }}),
-	Enum('filterMethod', { choices: { adaptive: 0 }}),
-	Enum('interlaceMethod', { choices: { none: 0, adam7: 1 }}),
+	Enum('compressionMethod', { choices: { deflate: 0 } }),
+	Enum('filterMethod', { choices: { adaptive: 0 } }),
+	Enum('interlaceMethod', { choices: { none: 0, adam7: 1 } }),
 ]
 
 // binary image data
