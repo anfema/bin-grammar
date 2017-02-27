@@ -6,7 +6,7 @@ There are some other projects that do similar things:
 
 - [bin-parser](https://github.com/jfjlaros/bin-parser), does more or less the same but needs Yaml files
   to describe the grammar
-- [binary](https://www.npmjs.com/package/binary), has a more react like interface but gets complicated
+- [binary](https://www.npmjs.com/package/binary), has a chained interface but gets complicated
   once you have more dynamic data structures
 
 ## How to install
