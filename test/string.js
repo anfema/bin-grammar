@@ -30,6 +30,19 @@ test('string_variable_null_terminated', (t) => {
 	t.is(result.str, 'Hello world!');
 });
 
+test('string_variable_null_terminated_following', (t) => {
+	const buffer = Buffer.from('48656C6C6F20776F726C6421002121212100', 'hex');
+	const result = BinParser([
+		BinString('str1', { nullTerminated: true }),
+		BinString('str2', { nullTerminated: true }),
+	], buffer);
+
+	t.is(result.str1.length, 12);
+	t.is(result.str1, 'Hello world!');
+	t.is(result.str2.length, 4);
+	t.is(result.str2, '!!!!');
+});
+
 test('string_fixed_size_prefix', (t) => {
 	const buffer = Buffer.from('0c48656C6C6F20776F726C6421212121', 'hex');
 	const result = BinParser([

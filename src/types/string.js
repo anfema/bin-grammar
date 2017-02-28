@@ -69,6 +69,7 @@ function BinString(name,
 			for(let i = 0; i < buffer.length; i += 1) {
 				if (buffer[i] === 0x00) {
 					end = i;
+					size = end + 1;
 					break;
 				}
 			}
@@ -76,7 +77,7 @@ function BinString(name,
 			return {
 				name,
 				value: transform(buffer.toString(encoding, 0, end)),
-				size: end,
+				size,
 			};
 		} else if (sizePrefixed) {
 			// zero length string is possible, so return zero string
