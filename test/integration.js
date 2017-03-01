@@ -39,6 +39,7 @@ const chunkParser = [
 		Selector('data', {
 			sizeField: 'length',
 			field: 'name',
+			flatten: true,
 			select: [
 				{ match: 'IHDR', struct: ihdrParser },
 				{ match: 'IDAT', struct: idatParser },
@@ -82,7 +83,7 @@ test('png_parse', (t) => {
 	t.is(result.chunks[0].crc, true);
 	t.is(result.chunks[1].name, 'IDAT');
 	t.is(result.chunks[1].length, 16);
-	t.is(result.chunks[1].data.data.length, 16);
+	t.is(result.chunks[1].data.length, 16);
 	t.is(result.chunks[1].crc, true);
 	t.is(result.chunks[2].name, 'IEND');
 	t.is(result.chunks[2].length, 0);

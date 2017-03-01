@@ -10,6 +10,7 @@ function Selector(name,
 	{
 		select,
 		field,
+		flatten = false,
 		sizeField,
 		sizeFieldTransform = (value) => value,
 	}
@@ -35,13 +36,17 @@ function Selector(name,
 			if (matched) {
 				// case found apply struct
 				let offset = 0;
-				const result = {};
+				let result = {};
 
 				for (const item of struct) {
 					const slice = data.slice(offset, data.length);
 					const r = item(slice, result);
 
-					result[r.name] = r.value;
+					if ((struct.length === 1) && flatten) {
+						result = r.value;
+					} else {
+						result[r.name] = r.value;
+					}
 					offset += r.size;
 				}
 

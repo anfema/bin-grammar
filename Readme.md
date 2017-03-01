@@ -77,6 +77,7 @@ const chunkGrammar = [
 		Selector('data', {
 			sizeField: 'length',
 			field: 'name',
+			flatten: true,
 			select: [
 				{ match: 'IHDR', struct: ihdrGrammar },
 				{ match: 'IDAT', struct: idatGrammar },
@@ -94,7 +95,9 @@ assumed to be appended to data). The following fields define the chunk header an
 We use a `Selector` to divide the parsing up into three more grammars, one for each chunk type. The
 determining factor is the `name` field and the size of the data we will consume is encoded in the `length`
 field. (If you wanted to calculate something on the `sizeField`, like substracting header length, you can
-set `sizeFieldTransform` to a transform function).
+set `sizeFieldTransform` to a transform function). We define the parser may `flatten` the result, which
+means it does not create an object with just one key-value pair in it but ignores the name of that value
+and flattens the object to a single value.
 
 The chunk grammars are set up like this:
 
@@ -128,7 +131,8 @@ contain any data.
 
 The data chunk (`IDAT`) just contains the compressed image data, which we would decompress and
 decode after parsing the file structure. In this example we just define it as `Binary` data and
-ignore it.
+ignore it. As we defined that the selector should flatten the tree, the data is saved directly into
+the `data` field on the toplevel.
 
 The interesting part is the header grammar (`IHDR`) which tells us something about the image we
 can actually parse and make use of. At first there are some integers which describe the dimensions
@@ -167,13 +171,11 @@ The `result` is something like this:
       "length": 16,
       "name": "IDAT",
       "data": {
-        "data": {
-          "type": "Buffer",
-          "data": [
-            120, 156,  98,  96,   1,   0,   0,   0,
-            255, 255,   3,   0,   0,   6,   0,   5
-          ]
-        }
+		"type": "Buffer",
+		"data": [
+		120, 156,  98,  96,   1,   0,   0,   0,
+		255, 255,   3,   0,   0,   6,   0,   5
+		]
       },
       "crc": true
     },
@@ -480,6 +482,7 @@ Use a `Selector` to switch between grammars based on a field.
 - Options:
 	- `select`: object for switch cases: `match` = value to match, `struct` = sub-struct to parse
 	- `field`: field to check for value
+	- `flatten`: if set to `true` the parser will flatten "one value objects" to map to the `name` directly
 	- `sizeField`: size field from parse tree
 	- `sizeFieldTransfrom`: transform function to modify the size field value before using it
 
