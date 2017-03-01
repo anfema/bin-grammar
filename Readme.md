@@ -509,3 +509,12 @@ CRC matches or `false` if it does not.
 	- `CRC8`
 	- `CRC8_1Wire`
 	- `CRC8_XOR` (Not really a CRC but used in some protocols as a parity value)
+
+## TODO
+
+- Allow re-construction of binary data from a result object and a parse definition
+	- Problem 1: reversing the transform functions
+	- Problem 2: grammars are layed out as parsing functions, needs to be a parser and a encoder.
+	  this will probably change the API to define your own types, so version will increment to 2.0
+- Make the `bigEndian` flag inherit from a setting on the parser as mostly the endianness does not
+  actually change in a single packet.
