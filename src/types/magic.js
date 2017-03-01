@@ -24,8 +24,8 @@ function Magic(name,
 		throw new Error('Magic parser only accepts `Buffer` or `String`');
 	}
 
-	return function (buffer) {
-		const { value, size } = extractor(buffer);
+	return function (buffer, parseTree, { bigEndian }) {
+		const { value, size } = extractor(buffer, {}, { bigEndian });
 
 		// string and buffer need different comparison methods
 		let valid = false;

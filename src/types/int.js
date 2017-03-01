@@ -1,14 +1,14 @@
 // Generic Signed Integer (two's complement)
 //
 // size: byte length
-// bigEndian: choose big endian encoding, else little endian encoded
+// bigEndian: override big endian encoding, else little endian encoded
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns transformed signed integer
 function Int(name,
 	{
 		size = 1,
-		bigEndian = true,
+		bigEndian,
 		transform = value => value,
 	} = {}
 ) {
@@ -16,8 +16,12 @@ function Int(name,
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function (buffer) {
+	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let value = 0;
+
+		if (bigEndian === undefined) {
+			bigEndian = inheritBigEndian;
+		}
 
 		// parse int from buffer, we could probably use the buffer functions
 		// for this but this way we can do 24 bit values for example
@@ -58,13 +62,13 @@ function Int8(name,	{ transform = value => value } = {}) {
 
 // 16 Bit Signed Integer (two's complement)
 //
-// bigEndian: choose big endian encoding, else little endian encoded
+// bigEndian: override big endian encoding, else little endian encoded
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns transformed signed integer
 function Int16(name,
 	{
-		bigEndian = true,
+		bigEndian,
 		transform = value => value,
 	} = {}
 ) {
@@ -73,13 +77,13 @@ function Int16(name,
 
 // 32 Bit Signed Integer (two's complement)
 //
-// bigEndian: choose big endian encoding, else little endian encoded
+// bigEndian: override big endian encoding, else little endian encoded
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns transformed signed integer
 function Int32(name,
 	{
-		bigEndian = true,
+		bigEndian,
 		transform = value => value,
 	} = {}
 ) {

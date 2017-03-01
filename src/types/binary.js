@@ -6,7 +6,7 @@ const { UInt } = require('./uint');
 // sizeField: if set use this field name from the parse tree for the size of this data item
 // sizePrefixed: if set it is assumed that the data is prefixed with it's length
 // sizePrefixLength: length of the size prefix
-// bigEndian: set big endian encoding for the size prefix
+// bigEndian: override big endian encoding for the size prefix
 // sizeFieldTransform: transform function to call before using the value of the size field
 // transform: result value transform function to call on the data before returning it as result
 //
@@ -17,18 +17,18 @@ function Binary(name,
 		sizeField,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
-		sizePrefixBigEndian = true,
+		sizePrefixBigEndian,
 		sizeFieldTransform = value => value,
 		transform = value => value,
 	} = {}
 ) {
-	return function (buffer, parseTree) {
+	return function (buffer, parseTree, { bigEndian }) {
 		let offset = 0;
 
 		// determine size to copy to result buffer
 		if (sizePrefixed) {
 			const prefixParser = UInt('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
-			const result = prefixParser(buffer);
+			const result = prefixParser(buffer, {}, { bigEndian });
 
 			size = result.value;
 			offset = result.size;
@@ -62,7 +62,7 @@ function Binary(name,
 // sizeField: if set use this field name from the parse tree for the size of this data item
 // sizePrefixed: if set it is assumed that the data is prefixed with it's length
 // sizePrefixLength: length of the size prefix
-// sizePrefixBigEndian: set big endian encoding for the size prefix
+// sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeFieldTransform: transform function to call before using the value of the size field
 // transform: result value transform function to call on the data before returning it as result
 //
@@ -73,7 +73,7 @@ function BCD(name,
 		sizeField,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
-		sizePrefixBigEndian = true,
+		sizePrefixBigEndian,
 		sizeFieldTransform = value => value,
 		transform = value => value,
 	}

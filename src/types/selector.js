@@ -15,7 +15,7 @@ function Selector(name,
 		sizeFieldTransform = (value) => value,
 	}
 ) {
-	return function (buffer, parseTree) {
+	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let size = buffer.length;
 
 		if (sizeField) {
@@ -40,7 +40,7 @@ function Selector(name,
 
 				for (const item of struct) {
 					const slice = data.slice(offset, data.length);
-					const r = item(slice, result);
+					const r = item(slice, result, { bigEndian: inheritBigEndian });
 
 					if ((struct.length === 1) && flatten) {
 						result = r.value;

@@ -22,13 +22,13 @@ function crc8_xor(buffer) {
 //
 // returns: parser function to calculate and validate a CRC checksum (returns true or false)
 function CRC(name, elements, crcSize, crcFunction) {
-	return function (buffer, parseTree) {
+	return function (buffer, parseTree, { bigEndian }) {
 		let offset = 0;
 
 		// execute all elements, add to toplevel parse tree (yeah some kind of hack, i know)
 		for (const item of elements) {
 			const slice = buffer.slice(offset, buffer.length);
-			const r = item(slice, parseTree);
+			const r = item(slice, parseTree, { bigEndian });
 
 			parseTree[r.name] = r.value;
 			offset += r.size;
@@ -36,7 +36,7 @@ function CRC(name, elements, crcSize, crcFunction) {
 
 		// read crc
 		const crcParser = BinString('crc', { size: crcSize, encoding: 'hex' });
-		const r = crcParser(buffer.slice(offset, offset + crcSize));
+		const r = crcParser(buffer.slice(offset, offset + crcSize), {}, { bigEndian });
 		const checksum = r.value;
 
 		// calculate crc

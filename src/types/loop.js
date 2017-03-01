@@ -3,7 +3,7 @@
 // struct: the structure that repeats
 // repetitionsPrefixed: this loop is prefixed with a repetition count
 // repetitionsPrefixLength: size of the prefix
-// repetitionsBigEndian: endianness of size prefix
+// repetitionsBigEndian: override endianness of size prefix
 // repetitions: how often the sub-struct repeats, defaults to Infinity
 // repetitionsField: field in the parse tree that defines the repetition count
 //
@@ -15,11 +15,15 @@ function Loop(name,
 		repetitionsField,
 		repetitionsPrefixed = false,
 		repetitionsPrefixLength = 0,
-		repetitionsBigEndian = true,
+		repetitionsBigEndian,
 	}
 ) {
-	return function (buffer, parseTree) {
+	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let offset = 0;
+
+		if (repetitionsBigEndian === undefined) {
+			repetitionsBigEndian = inheritBigEndian;
+		}
 
 		// determine how many repetitions we want
 		if (repetitionsPrefixed) {
@@ -47,7 +51,7 @@ function Loop(name,
 			// loop over items in the sub struct
 			for (const item of struct) {
 				const slice = data.slice(parserOffset, data.length);
-				const r = item(slice, loopResult);
+				const r = item(slice, loopResult, { bigEndian: inheritBigEndian });
 
 				loopResult[r.name] = r.value;
 				parserOffset += r.size;

@@ -11,19 +11,19 @@ const { UInt } = require('./uint');
 //
 // returns: parser function that returns an object with the destructured bits
 function BitStruct(name, { size = 1, sizeField, sizeFieldTransform = (value) => value, elements }) {
-	return function (buffer, parseTree) {
+	return function (buffer, parseTree, { bigEndian }) {
 		if (sizeField) {
 			size = sizeFieldTransform(parseTree[sizeField]);
 		}
 
 		const parser = UInt('parser', { size });
-		const parsed = parser(buffer.slice(0, size));
+		const parsed = parser(buffer.slice(0, size), {}, { bigEndian });
 		const data = parsed.value;
 
 		let offset = 0;
 		const result = {};
 
-		for (item of elements) {
+		for (const item of elements) {
 			const r = item(data, (size * 8) - offset);
 
 			result[r.name] = r.value;

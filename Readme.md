@@ -189,6 +189,17 @@ The `result` is something like this:
 }
 ```
 
+## Parser interface
+
+- Function name: `BinParser`
+- Parameters:
+	- `definition`: the grammar to use
+	- `buffer`: the buffer to parse
+	- `options`: options object
+- Options:
+	- `bigEndian`: sets the default endianness of the parser (default: `true`)
+- Returns: Javascript Object with parsed structure
+
 ## Available data types
 
 The following datatypes are defined in the library, you can define your own like this:
@@ -207,11 +218,14 @@ The following datatypes are defined in the library, you can define your own like
 // parseTree: contains the parse tree that has been generated before
 //            this parser function is called. Used to access external
 //            size fields, etc.
+// options:
+//  - `bigEndian`: Big endian setting from the parser to inherit from
+//                 when not explicitly set
 //
 // The parse function returns the field name, the parsed value and
 // the number of bytes consumed in the process.
 function CustomType(name, { size = 1, transform = value => value } = {}) {
-	return function (buffer, parseTree) {
+	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		return {
 			name,
 			value: transform(buffer.slice(0, size)),
@@ -232,7 +246,7 @@ function CustomType(name, { size = 1, transform = value => value } = {}) {
 	- `sizeField`: if set use this field name from the parse tree for the size of this data item
 	- `sizePrefixed`: if set it is assumed that the data is prefixed with it's length (default: `false`)
 	- `sizePrefixLength`: length of the size prefix
-	- `sizePrefixBigEndian`: set big endian encoding for the size prefix (default: `true`)
+	- `sizePrefixBigEndian`: override big endian encoding for the size prefix (default: as defined in parser)
 	- `sizeFieldTransform`: transform function to call before using the value of the size field
 	- `transform`: result value transform function to call on the data before returning it as result
 
@@ -248,7 +262,7 @@ function CustomType(name, { size = 1, transform = value => value } = {}) {
 	- `nullTerminated`: if size is 0 this defines a variable length string with a zero terminator (default: `false`)
 	- `sizePrefixed`: if set it is assumed that the string is prefixed with it's length (default: `false`)
 	- `sizePrefixLength`: length of the size prefix
-	- `sizePrefixBigEndian`: set big endian encoding for the size prefix
+	- `sizePrefixBigEndian`: override big endian encoding for the size prefix (default: as defined in parser)
 	- `sizeField`: field in the parse tree that defines the size
 	- `sizeFieldTransform`: transform function applied to the size field before using the value
 	- `transform`: transform function applied before returning the string
@@ -265,7 +279,7 @@ Signed integers are two's complement, which means if the first bit is a one the 
 	- `options`: Options object
 - Options:
 	- `size`: byte length
-	- `bigEndian`: choose big endian encoding, else little endian encoded (default: `true`)
+	- `bigEndian`: override big endian encoding (default: as defined in parser)
 	- `transform`: value transformer function gets the parsed value as parameter
 - Specialized types: `Int8` (8 Bit integer), `Int16` (16 Bit integer), `Int32` (32 Bit integer)
 
@@ -281,7 +295,7 @@ big number library of your choosing.
 	- `options`: Options object
 - Options:
 	- `size`: byte length
-	- `bigEndian`: choose big endian encoding, else little endian encoded (default: `true`)
+	- `bigEndian`: override big endian encoding (default: as defined in parser)
 	- `transform`: value transformer function gets the parsed value as parameter
 - Specialized types: `UInt8` (8 Bit integer), `UInt16` (16 Bit integer), `UInt32` (32 Bit integer)
 
@@ -297,7 +311,7 @@ big number library of your choosing.
 	- `options`: Options object
 - Options:
 	- `size`: byte length (either 4 or 8, as IEEE does not define other lengths, default: `4`)
-	- `bigEndian`: choose big endian encoding, else little endian encoded (default: `true`)
+	- `bigEndian`: override big endian encoding (default: as defined in parser)
 	- `transform`: value transformer function gets the parsed value as parameter
 - Specialized type: `Double` (8 byte IEEE double)
 
@@ -313,7 +327,7 @@ big number library of your choosing.
 	- `sizeField`: if set use this field name from the parse tree for the size of this data item
 	- `sizePrefixed`: if set it is assumed that the data is prefixed with it's length
 	- `sizePrefixLength`: length of the size prefix
-	- `sizePrefixBigEndian`: set big endian encoding for the size prefix
+	- `sizePrefixBigEndian`: override big endian encoding for the size prefix (default: as defined in parser)
 	- `sizeFieldTransform`: transform function to call before using the value of the size field
 	- `transform`: result value transform function to call on the data before returning it as result
 
@@ -329,7 +343,7 @@ big number library of your choosing.
 	- `nullTerminated`: if size is 0 this defines a variable length string with a zero terminator
 	- `sizePrefixed`: if set it is assumed that the string is prefixed with it's length
 	- `sizePrefixLength`: length of the size prefix
-	- `sizePrefixBigEndian`: set big endian encoding for the size prefix
+	- `sizePrefixBigEndian`: override big endian encoding for the size prefix (default: as defined in parser)
 	- `sizeField`: field in the parse tree that defines the size
 	- `sizeFieldTransform`: transform function applied to the size field before using the value
 	- `transform`: transform function applied before returning the number
@@ -346,7 +360,7 @@ big number library of your choosing.
 	- `nullTerminated`: if size is 0 this defines a variable length string with a zero terminator
 	- `sizePrefixed`: if set it is assumed that the string is prefixed with it's length
 	- `sizePrefixLength`: length of the size prefix
-	- `sizePrefixBigEndian`: set big endian encoding for the size prefix
+	- `sizePrefixBigEndian`: override big endian encoding for the size prefix (default: as defined in parser)
 	- `sizeField`: field in the parse tree that defines the size
 	- `sizeFieldTransform`: transform function applied to the size field before using the value
 	- `transform`: transform function applied before returning the number
@@ -382,7 +396,7 @@ big number library of your choosing.
 	- `options`: Options object
 - Options:
 	- `size`: byte length
-	- `bigEndian`: choose big endian encoding, else little endian encoded (default: `true`)
+	- `bigEndian`: override big endian encoding (default: as defined in parser)
 	- `choices`: Object, key is the name of the enumerated value, value is the value to check for
 
 ### Byte deconstruction
@@ -468,7 +482,7 @@ Use `Loop` elements if a list of elements repeats.
 	- `repetitions`: how often the sub-struct repeats (default: `Infinity`)
 	- `repetitionsPrefixed`: this loop is prefixed with a repetition count
 	- `repetitionsPrefixLength`: size of the prefix
-	- `repetitionsBigEndian`: endianness of size prefix (default: `true`)
+	- `repetitionsBigEndian`: override endianness of size prefix (default: as defined in parser)
 	- `repetitionsField`: field in the parse tree that defines the repetition count
 
 ## Switch statements
@@ -516,5 +530,3 @@ CRC matches or `false` if it does not.
 	- Problem 1: reversing the transform functions
 	- Problem 2: grammars are layed out as parsing functions, needs to be a parser and a encoder.
 	  this will probably change the API to define your own types, so version will increment to 2.0
-- Make the `bigEndian` flag inherit from a setting on the parser as mostly the endianness does not
-  actually change in a single packet.

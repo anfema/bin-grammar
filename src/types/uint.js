@@ -1,14 +1,14 @@
 // Generic Unsigned Integer
 //
 // size: byte length
-// bigEndian: choose big endian encoding, else little endian encoded
+// bigEndian: override big endian encoding
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns a transformed unsigned integer
 function UInt(name,
 	{
 		size = 1,
-		bigEndian = true,
+		bigEndian,
 		transform = value => value,
 	} = {}
 ) {
@@ -16,8 +16,12 @@ function UInt(name,
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function (buffer) {
+	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let value = 0;
+
+		if (bigEndian === undefined) {
+			bigEndian = inheritBigEndian;
+		}
 
 		for (let i = 0; i < size; i += 1) {
 			if (bigEndian) {
@@ -46,21 +50,21 @@ function UInt8(name, { transform = value => value } = {}) {
 
 // 16 Bit Unsigned Integer
 //
-// bigEndian: choose big endian encoding, else little endian encoded
+// bigEndian: override big endian encoding
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns a transformed unsigned integer
-function UInt16(name, { bigEndian = true, transform = value => value } = {}) {
+function UInt16(name, { bigEndian, transform = value => value } = {}) {
 	return UInt(name, { size: 2, bigEndian, transform });
 }
 
 // 32 Bit Unsigned Integer
 //
-// bigEndian: choose big endian encoding, else little endian encoded
+// bigEndian: override big endian encoding
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns a transformed unsigned integer
-function UInt32(name, { bigEndian = true, transform = value => value } = {}) {
+function UInt32(name, { bigEndian, transform = value => value } = {}) {
 	return UInt(name, { size: 4, bigEndian, transform });
 }
 

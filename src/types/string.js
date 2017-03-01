@@ -7,7 +7,7 @@ const { UInt } = require('./uint');
 // nullTerminated: if size is 0 this defines a variable length string with a zero terminator
 // sizePrefixed: if set it is assumed that the string is prefixed with it's length
 // sizePrefixLength: length of the size prefix
-// sizePrefixBigEndian: set big endian encoding for the size prefix
+// sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeField: field in the parse tree that defines the size
 // sizeFieldTransform: transform function applied to the size field before using the value
 // transform: transform function applied before returning the string
@@ -20,7 +20,7 @@ function BinString(name,
 		nullTerminated = false,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
-		sizePrefixBigEndian = false,
+		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform = value => value,
 		transform = value => value,
@@ -30,12 +30,16 @@ function BinString(name,
 		throw new Error('Invalid string parser invocation, you have to specify `size` or `sizeField` or set `nullTerminated` to `true` or have a size prefix');
 	}
 
-	return function (buffer, parseTree) {
+	return function (buffer, parseTree, { bigEndian: inheritBigEndian}) {
 		let offset = 0;
+
+		if (sizePrefixBigEndian === undefined) {
+			sizePrefixBigEndian = inheritBigEndian;
+		}
 
 		if (sizePrefixed) {
 			const prefixParser = UInt('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
-			const result = prefixParser(buffer);
+			const result = prefixParser(buffer, {}, { bigEndian: inheritBigEndian });
 
 			size = result.value;
 			offset = result.size;
@@ -97,7 +101,7 @@ function BinString(name,
 // nullTerminated: if size is 0 this defines a variable length string with a zero terminator
 // sizePrefixed: if set it is assumed that the string is prefixed with it's length
 // sizePrefixLength: length of the size prefix
-// sizePrefixBigEndian: set big endian encoding for the size prefix
+// sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeField: field in the parse tree that defines the size
 // sizeFieldTransform: transform function applied to the size field before using the value
 // transform: transform function applied before returning the number
@@ -109,7 +113,7 @@ function ASCIIInteger(name,
 		nullTerminated = false,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
-		sizePrefixBigEndian = false,
+		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform = value => value,
 		transform = value => value,
@@ -133,7 +137,7 @@ function ASCIIInteger(name,
 // nullTerminated: if size is 0 this defines a variable length string with a zero terminator
 // sizePrefixed: if set it is assumed that the string is prefixed with it's length
 // sizePrefixLength: length of the size prefix
-// sizePrefixBigEndian: set big endian encoding for the size prefix
+// sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeField: field in the parse tree that defines the size
 // sizeFieldTransform: transform function applied to the size field before using the value
 // transform: transform function applied before returning the number
@@ -145,7 +149,7 @@ function ASCIIFloat(name,
 		nullTerminated = false,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
-		sizePrefixBigEndian = false,
+		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform = value => value,
 		transform = value => value,

@@ -14,7 +14,7 @@ function Bitmask(name,
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function (buffer) {
+	return function (buffer, parseTree, { bigEndian }) {
 		const result = [];
 		let value = 0;
 
