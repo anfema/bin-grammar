@@ -1,5 +1,5 @@
 const test = require('ava');
-const { BinParser, Binary, Enum, Magic, UInt32, UInt8, BinString, Loop, Selector, CRC32 } = require('../index');
+const { parse, binary, enumeration, magic, uint32, uint8, binString, loop, selector, crc32 } = require('../index');
 
 //
 // chunk content parsers
@@ -7,23 +7,23 @@ const { BinParser, Binary, Enum, Magic, UInt32, UInt8, BinString, Loop, Selector
 
 // header
 const ihdrParser = [
-	UInt32('width'),
-	UInt32('height'),
-	UInt8('bitDepth'),
-	Enum('colorType', { choices: {
+	uint32('width'),
+	uint32('height'),
+	uint8('bitDepth'),
+	enumeration('colorType', { choices: {
 		greyscale: 0,
 		trueColor: 2,
 		indexedColor: 3,
 		grayscaleWithAlpha: 4,
 		trueColorWithAlpha: 6
 	} }),
-	Enum('compressionMethod', { choices: { deflate: 0 } }),
-	Enum('filterMethod', { choices: { adaptive: 0 } }),
-	Enum('interlaceMethod', { choices: { none: 0, adam7: 1 } }),
+	enumeration('compressionMethod', { choices: { deflate: 0 } }),
+	enumeration('filterMethod', { choices: { adaptive: 0 } }),
+	enumeration('interlaceMethod', { choices: { none: 0, adam7: 1 } }),
 ]
 
 // binary image data
-const idatParser = [Binary('data')];
+const idatParser = [binary('data')];
 
 // no content
 const iendParser = [];
@@ -33,10 +33,10 @@ const iendParser = [];
 //
 
 const chunkParser = [
-	UInt32('length'),
-	CRC32('crc', [
-		BinString('name', { size: 4 }),
-		Selector('data', {
+	uint32('length'),
+	crc32('crc', [
+		binString('name', { size: 4 }),
+		selector('data', {
 			sizeField: 'length',
 			field: 'name',
 			flatten: true,
@@ -54,8 +54,8 @@ const chunkParser = [
 //
 
 const pngParser = [
-	Magic('magic', { data: Buffer.from('89504e470d0a1a0a', 'hex') }),
-	Loop('chunks', { struct: chunkParser })
+	magic('magic', { data: Buffer.from('89504e470d0a1a0a', 'hex') }),
+	loop('chunks', { struct: chunkParser })
 ];
 
 // smallest possible 1x1 px transparent png
@@ -67,7 +67,7 @@ const buffer = Buffer.from(
 );
 
 test('png_parse', (t) => {
-	const result = BinParser(pngParser, buffer);
+	const result = parse(pngParser, buffer);
 
 	t.is(result.magic, true);
 	t.is(result.chunks.length, 3);

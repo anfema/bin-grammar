@@ -3,20 +3,22 @@
 // size: byte length, defaults to 4 (the IEEE single precision float length)
 // bigEndian: override endian encoding, else little endian encoded
 // transform: value transformer function gets the parsed value as parameter, returns new value
+// reverseTransform: reverse of the transform function for encoding
 //
 // returns: parser function that returns a float
-function Float(name,
+function float(name,
 	{
 		size = 4,
 		bigEndian,
 		transform = value => value,
+		reverseTransform = value => value,
 	} = {}
 ) {
 	if ((size !== 4) && (size !== 8)) {
 		throw new Error('IEEE Floats are either 32 bits or 64 bits long');
 	}
 
-	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
+	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let value = 0;
 
 		if (bigEndian === undefined) {
@@ -39,30 +41,44 @@ function Float(name,
 		}
 
 		return {
-			name,
 			value: transform(value),
 			size,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+	}
+
+	function encode(object, { bigEndian }) {
+		// TODO: encode float
+	}
+
+	function makeStruct() {
+		return 0.0;
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // IEEE Double, specialized double precision parser
 //
 // bigEndian: set endian encoding, else little endian encoded
 // transform: value transformer function gets the parsed value as parameter, returns new value
+// reverseTransform: reverse of the transform function for encoding
 //
 // returns: parser function that returns a double
-function Double(name,
+function double(name,
 	{
 		bigEndian,
 		transform = value => value,
+		reverseTransform = value => value,
 	} = {}
 ) {
-	return Float(name, { size: 8, bigEndian, transform });
+	return float(name, { size: 8, bigEndian, transform, reverseTransform });
 }
 
 // export everything
 module.exports = {
-	Float,
-	Double,
+	float,
+	double,
 };

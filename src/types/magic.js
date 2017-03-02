@@ -1,5 +1,5 @@
-const { BinString } = require('./string');
-const { Binary } = require('./binary');
+const { binString } = require('./string');
+const { binary } = require('./binary');
 
 // Fixed magic string or Buffer, often used for packet sync or file type headers
 //
@@ -7,7 +7,7 @@ const { Binary } = require('./binary');
 // encoding: if data is a string this defines the string encoding
 //
 // returns: parser function that returns true if magic matches, false if it does not
-function Magic(name,
+function magic(name,
 	{
 		data,
 		encoding = 'ascii',
@@ -17,15 +17,15 @@ function Magic(name,
 
 	// determine how to extract the magic
 	if (typeof data === 'string') {
-		extractor = BinString(name, { size: data.length, encoding });
+		extractor = binString(name, { size: data.length, encoding });
 	} else if (data instanceof Buffer) {
-		extractor = Binary(name, { size: data.length });
+		extractor = binary(name, { size: data.length });
 	} else {
 		throw new Error('Magic parser only accepts `Buffer` or `String`');
 	}
 
-	return function (buffer, parseTree, { bigEndian }) {
-		const { value, size } = extractor(buffer, {}, { bigEndian });
+	function parse(buffer, parseTree, { bigEndian }) {
+		const { value, size } = extractor.parse(buffer, {}, { bigEndian });
 
 		// string and buffer need different comparison methods
 		let valid = false;
@@ -36,12 +36,24 @@ function Magic(name,
 		}
 
 		return {
-			name,
 			value: valid,
 			size,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+	}
+
+	function encode(object, { bigEndian }) {
+		return Buffer.from(data);
+	}
+
+	function makeStruct() {
+		return Buffer.from(data);
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // export everything
-module.exports = Magic;
+module.exports = magic;

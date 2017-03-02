@@ -1,8 +1,9 @@
-const { BinString } = require('./string');
-const crc = require('crc');
+const { uint } = require('./uint');
+const { binString } = require('./string');
+const crcLib = require('crc');
 
 // internal function, just xors all bytes together
-function crc8_xor(buffer) {
+function crc8xor(buffer) {
 	let result = 0;
 
 	for (const character of buffer) {
@@ -21,21 +22,21 @@ function crc8_xor(buffer) {
 // crcFunction: crc function to call, will be called with a buffer slice as sole parameter
 //
 // returns: parser function to calculate and validate a CRC checksum (returns true or false)
-function CRC(name, elements, crcSize, crcFunction) {
-	return function (buffer, parseTree, { bigEndian }) {
+function crc(name, elements, crcSize, crcFunction) {
+	function parse(buffer, parseTree, { bigEndian }) {
 		let offset = 0;
 
 		// execute all elements, add to toplevel parse tree (yeah some kind of hack, i know)
-		for (const item of elements) {
+		for (const { parse: parseItem, name: itemName } of elements) {
 			const slice = buffer.slice(offset, buffer.length);
-			const r = item(slice, parseTree, { bigEndian });
+			const r = parseItem(slice, parseTree, { bigEndian });
 
-			parseTree[r.name] = r.value;
+			parseTree[itemName] = r.value;
 			offset += r.size;
 		}
 
 		// read crc
-		const crcParser = BinString('crc', { size: crcSize, encoding: 'hex' });
+		const crcParser = binString('crc', { size: crcSize, encoding: 'hex' }).parse;
 		const r = crcParser(buffer.slice(offset, offset + crcSize), {}, { bigEndian });
 		const checksum = r.value;
 
@@ -45,11 +46,49 @@ function CRC(name, elements, crcSize, crcFunction) {
 		const match = (checksum === calculated);
 
 		return {
-			name,
 			value: match,
 			size: offset + crcSize,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+		parseTree[name] = {};
+
+		for (const { name: itemName } of elements) {
+			const item = parseTree[itemName];
+
+			parseTree[itemName] = undefined;
+			parseTree[name][itemName] = item;
+		}
+	}
+
+	function encode(object, { bigEndian }) {
+		const buffers = [];
+
+		// encode all elements and add to buffer list
+		for (const { encode: encodeItem, name: itemName } of elements) {
+			const r = encodeItem(object[itemName], { bigEndian });
+
+			buffers.push(r);
+		}
+
+		const calculated = crcFunction(Buffer.concat(buffers));
+
+
+		// write crc
+		const crcEncoder = uint('crc', { size: crcSize, bigEndian: true }).encode;
+		const r = crcEncoder(calculated, { bigEndian });
+
+		const data = Buffer.concat([...buffers, r]);
+
+		return data;
+	}
+
+	function makeStruct() {
+		return Buffer.alloc(crcSize);
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // CRC 32 checksumming function
@@ -59,8 +98,8 @@ function CRC(name, elements, crcSize, crcFunction) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC32(name, elements) {
-	return CRC(name, elements, 4, crc.crc32);
+function crc32(name, elements) {
+	return crc(name, elements, 4, crcLib.crc32);
 }
 
 // CRC 24 checksumming function
@@ -70,8 +109,8 @@ function CRC32(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC24(name, elements) {
-	return CRC(name, elements, 3, crc.crc24);
+function crc24(name, elements) {
+	return crc(name, elements, 3, crcLib.crc24);
 }
 
 // CRC 16 checksumming function
@@ -81,8 +120,8 @@ function CRC24(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC16(name, elements) {
-	return CRC(name, elements, 2, crc.crc16);
+function crc16(name, elements) {
+	return crc(name, elements, 2, crcLib.crc16);
 }
 
 // CRC 16 checksumming function with CCITT tables
@@ -92,8 +131,8 @@ function CRC16(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC16_CCITT(name, elements) {
-	return CRC(name, elements, 2, crc.crc16ccitt);
+function crc16CCITT(name, elements) {
+	return crc(name, elements, 2, crcLib.crc16ccitt);
 }
 
 // CRC 16 checksumming function with Modbus tables
@@ -103,8 +142,8 @@ function CRC16_CCITT(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC16_Modbus(name, elements) {
-	return CRC(name, elements, 2, crc.crc16modbus);
+function crc16Modbus(name, elements) {
+	return crc(name, elements, 2, crcLib.crc16modbus);
 }
 
 // CRC 16 checksumming function, Kermit version
@@ -114,8 +153,8 @@ function CRC16_Modbus(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC16_Kermit(name, elements) {
-	return CRC(name, elements, 2, crc.crc16kermit);
+function crc16Kermit(name, elements) {
+	return crc(name, elements, 2, crcLib.crc16kermit);
 }
 
 // CRC 16 checksumming function, XModem version
@@ -125,8 +164,8 @@ function CRC16_Kermit(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC16_XModem(name, elements) {
-	return CRC(name, elements, 2, crc.crc16xmodem);
+function crc16XModem(name, elements) {
+	return crc(name, elements, 2, crcLib.crc16xmodem);
 }
 
 // CRC 8 checksumming function
@@ -136,8 +175,8 @@ function CRC16_XModem(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC8(name, elements) {
-	return CRC(name, elements, 1, crc.crc8);
+function crc8(name, elements) {
+	return crc(name, elements, 1, crcLib.crc8);
 }
 
 // CRC 8 checksumming function, 1 Wire version
@@ -147,8 +186,8 @@ function CRC8(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC8_1Wire(name, elements) {
-	return CRC(name, elements, 1, crc.crc81wire);
+function crc81Wire(name, elements) {
+	return crc(name, elements, 1, crcLib.crc81wire);
 }
 
 // CRC 8 "checksumming"" function, this one just XORs all bytes, not a real checksum
@@ -158,21 +197,21 @@ function CRC8_1Wire(name, elements) {
 //           as if the CRC call never happened
 //
 // returns: parser function to calculate and validate CRC which returns true or false
-function CRC8_XOR(name, elements) {
-	return CRC(name, elements, 1, crc8_xor);
+function crc8XOR(name, elements) {
+	return crc(name, elements, 1, crc8xor);
 }
 
 // export everything
 module.exports = {
-	CRC,
-	CRC32,
-	CRC24,
-	CRC16,
-	CRC16_CCITT,
-	CRC16_Modbus,
-	CRC16_Kermit,
-	CRC16_XModem,
-	CRC8,
-	CRC8_1Wire,
-	CRC8_XOR,
+	crc,
+	crc32,
+	crc24,
+	crc16,
+	crc16CCITT,
+	crc16Modbus,
+	crc16Kermit,
+	crc16XModem,
+	crc8,
+	crc81Wire,
+	crc8XOR,
 }

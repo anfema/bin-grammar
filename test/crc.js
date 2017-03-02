@@ -1,32 +1,36 @@
 const test = require('ava');
 const {
-	BinParser, Binary,
-	CRC32, CRC24, CRC16,
-	CRC16_CCITT, CRC16_Modbus,
-	CRC16_Kermit, CRC16_XModem,
-	CRC8, CRC8_1Wire, CRC8_XOR,
+	parse, encode, template,
+	binary,
+	crc32, crc24, crc16,
+	crc16CCITT, crc16Modbus,
+	crc16Kermit, crc16XModem,
+	crc8, crc81Wire, crc8XOR,
 } = require('../index');
 
 const hello = '48656C6C6F20576F726C64'; // Hello World
 
 test('crc32_success', (t) => {
+	const definition = [
+		crc32('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '4A17B156', 'hex');
-	const result = BinParser([
-		CRC32('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc32_fail', (t) => {
 	const buffer = Buffer.from(hello + '4A17B157', 'hex');
-	const result = BinParser([
-		CRC32('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc32('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -35,23 +39,26 @@ test('crc32_fail', (t) => {
 
 
 test('crc24_success', (t) => {
+	const definition = [
+		crc24('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + 'BA2CC4', 'hex');
-	const result = BinParser([
-		CRC24('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc24_fail', (t) => {
 	const buffer = Buffer.from(hello + 'BA2CC5', 'hex');
-	const result = BinParser([
-		CRC24('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc24('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -59,23 +66,26 @@ test('crc24_fail', (t) => {
 });
 
 test('crc16_success', (t) => {
+	const definition = [
+		crc16('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '3EEB', 'hex');
-	const result = BinParser([
-		CRC16('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc16_fail', (t) => {
 	const buffer = Buffer.from(hello + '3EEA', 'hex');
-	const result = BinParser([
-		CRC16('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc16('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -83,22 +93,25 @@ test('crc16_fail', (t) => {
 });
 
 test('crc16ccitt_success', (t) => {
+	const definition = [
+		crc16CCITT('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '4D25', 'hex');
-	const result = BinParser([
-		CRC16_CCITT('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc16ccitt_fail', (t) => {
 	const buffer = Buffer.from(hello + '4D24', 'hex');
-	const result = BinParser([
-		CRC16_CCITT('crc', [
-			Binary('data', { size: hello.length / 2 }),
+	const result = parse([
+		crc16CCITT('crc', [
+			binary('data', { size: hello.length / 2 }),
 		])
 	], buffer);
 
@@ -107,23 +120,26 @@ test('crc16ccitt_fail', (t) => {
 });
 
 test('crc16modbus_success', (t) => {
+	const definition = [
+		crc16Modbus('crc', [binary('data', { size: hello.length / 2 })])
+	]
 	const buffer = Buffer.from(hello + 'DAED', 'hex');
-	const result = BinParser([
-		CRC16_Modbus('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc16modbus_fail', (t) => {
 	const buffer = Buffer.from(hello + 'DAEC', 'hex');
-	const result = BinParser([
-		CRC16_Modbus('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc16Modbus('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -131,23 +147,26 @@ test('crc16modbus_fail', (t) => {
 });
 
 test('crc16kermit_success', (t) => {
+	const definition = [
+		crc16Kermit('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '23C9', 'hex');
-	const result = BinParser([
-		CRC16_Kermit('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc16kermit_fail', (t) => {
 	const buffer = Buffer.from(hello + '23C8', 'hex');
-	const result = BinParser([
-		CRC16_Kermit('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc16Kermit('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -155,23 +174,26 @@ test('crc16kermit_fail', (t) => {
 });
 
 test('crc16xmodem_success', (t) => {
+	const definition = [
+		crc16XModem('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '992A', 'hex');
-	const result = BinParser([
-		CRC16_XModem('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc16xmodem_fail', (t) => {
 	const buffer = Buffer.from(hello + '992B', 'hex');
-	const result = BinParser([
-		CRC16_XModem('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc16XModem('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -179,23 +201,26 @@ test('crc16xmodem_fail', (t) => {
 });
 
 test('crc8_success', (t) => {
+	const definition = [
+		crc8('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '25', 'hex');
-	const result = BinParser([
-		CRC8('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc8_fail', (t) => {
 	const buffer = Buffer.from(hello + '26', 'hex');
-	const result = BinParser([
-		CRC8('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc8('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -203,23 +228,26 @@ test('crc8_fail', (t) => {
 });
 
 test('crc81wire_success', (t) => {
+	const definition = [
+		crc81Wire('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '1a', 'hex');
-	const result = BinParser([
-		CRC8_1Wire('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc81wire_fail', (t) => {
 	const buffer = Buffer.from(hello + '1b', 'hex');
-	const result = BinParser([
-		CRC8_1Wire('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc81Wire('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -227,23 +255,26 @@ test('crc81wire_fail', (t) => {
 });
 
 test('crc8xor_success', (t) => {
+	const definition = [
+		crc8XOR('crc', [binary('data', { size: hello.length / 2 })])
+	];
 	const buffer = Buffer.from(hello + '20', 'hex');
-	const result = BinParser([
-		CRC8_XOR('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
-	], buffer);
+	const result = parse(definition, buffer);
 
 	t.is(result.data.length, hello.length / 2);
 	t.is(result.crc, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
 
 test('crc8xor_fail', (t) => {
 	const buffer = Buffer.from(hello + '21', 'hex');
-	const result = BinParser([
-		CRC8_XOR('crc', [
-			Binary('data', { size: hello.length / 2 }),
-		])
+	const result = parse([
+		crc8XOR('crc', [
+			binary('data', { size: hello.length / 2 }),
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);

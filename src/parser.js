@@ -2,15 +2,17 @@
 //
 // definition: array of type parser functions
 // buffer: buffer to parse
+// options:
+//  - `bigEndian`: default endianness of parser (default: `true`)
 function parse(definition, buffer, { bigEndian = true } = {}) {
 	let offset = 0;
 	const result = {};
 
-	for (const item of definition) {
+	for (const { parse: parseItem, name } of definition) {
 		const slice = buffer.slice(offset, buffer.length);
-		const r = item(slice, result, { bigEndian });
+		const r = parseItem(slice, result, { bigEndian });
 
-		result[r.name] = r.value;
+		result[name] = r.value;
 		offset += r.size;
 	}
 

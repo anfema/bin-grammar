@@ -1,20 +1,20 @@
 const test = require('ava');
-const { BinParser, BitStruct, BitFlag, BitInt, BitUInt, BitEnum, BitBitMask } = require('../index');
+const { parse, bitStruct, bitFlag, bitInt, bitUInt, bitEnum, bitBitMask } = require('../index');
 
 test('bit_flags', (t) => {
 	const buffer = Buffer.from('05', 'hex');
-	const result = BinParser([
-		BitStruct('bit', {
+	const result = parse([
+		bitStruct('bit', {
 			size: 1,
 			elements: [
-				BitFlag('bit1'),
-				BitFlag('bit2'),
-				BitFlag('bit3'),
-				BitFlag('bit4'),
-				BitFlag('bit5'),
-				BitFlag('bit6'),
-				BitFlag('bit7'),
-				BitFlag('bit8'),
+				bitFlag('bit1'),
+				bitFlag('bit2'),
+				bitFlag('bit3'),
+				bitFlag('bit4'),
+				bitFlag('bit5'),
+				bitFlag('bit6'),
+				bitFlag('bit7'),
+				bitFlag('bit8'),
 			],
 		}),
 	], buffer);
@@ -31,12 +31,12 @@ test('bit_flags', (t) => {
 
 test('bit_int', (t) => {
 	const buffer = Buffer.from('5f', 'hex');
-	const result = BinParser([
-		BitStruct('bit', {
+	const result = parse([
+		bitStruct('bit', {
 			size: 1,
 			elements: [
-				BitInt('int1', { size: 4 }),
-				BitInt('int2', { size: 4 }),
+				bitInt('int1', { size: 4 }),
+				bitInt('int2', { size: 4 }),
 			],
 		}),
 	], buffer);
@@ -47,12 +47,12 @@ test('bit_int', (t) => {
 
 test('bit_uint', (t) => {
 	const buffer = Buffer.from('5f', 'hex');
-	const result = BinParser([
-		BitStruct('bit', {
+	const result = parse([
+		bitStruct('bit', {
 			size: 1,
 			elements: [
-				BitUInt('int1', { size: 4 }),
-				BitUInt('int2', { size: 4 }),
+				bitUInt('int1', { size: 4 }),
+				bitUInt('int2', { size: 4 }),
 			],
 		}),
 	], buffer);
@@ -63,12 +63,12 @@ test('bit_uint', (t) => {
 
 test('bit_enum', (t) => {
 	const buffer = Buffer.from('5f', 'hex');
-	const result = BinParser([
-		BitStruct('bit', {
+	const result = parse([
+		bitStruct('bit', {
 			size: 1,
 			elements: [
-				BitUInt('int1', { size: 4 }),
-				BitEnum('enum', {
+				bitUInt('int1', { size: 4 }),
+				bitEnum('enum', {
 					size: 4,
 					choices: {
 						nothing: 0,
@@ -85,12 +85,12 @@ test('bit_enum', (t) => {
 
 test('bit_bitmask', (t) => {
 	const buffer = Buffer.from('53', 'hex');
-	const result = BinParser([
-		BitStruct('bit', {
+	const result = parse([
+		bitStruct('bit', {
 			size: 1,
 			elements: [
-				BitUInt('int1', { size: 4 }),
-				BitBitMask('mask', {
+				bitUInt('int1', { size: 4 }),
+				bitBitMask('mask', {
 					size: 4,
 					bitfield: {
 						bit0: 0,
@@ -112,12 +112,12 @@ test('bit_bitmask', (t) => {
 
 test('bit_integration', (t) => {
 	const buffer = Buffer.from('53f0', 'hex');
-	const result = BinParser([
-		BitStruct('bit', {
+	const result = parse([
+		bitStruct('bit', {
 			size: 2,
 			elements: [
-				BitUInt('int1', { size: 4 }),
-				BitBitMask('mask', {
+				bitUInt('int1', { size: 4 }),
+				bitBitMask('mask', {
 					size: 3,
 					bitfield: {
 						bit0: 0,
@@ -125,15 +125,15 @@ test('bit_integration', (t) => {
 						bit2: 2,
 					},
 				}),
-				BitFlag('flag'),
-				BitEnum('enum', {
+				bitFlag('flag'),
+				bitEnum('enum', {
 					size: 2,
 					choices: {
 						nothing: 0,
 						all: 3,
 					},
 				}),
-				BitInt('int2', { size: 6 }),
+				bitInt('int2', { size: 6 }),
 			],
 		}),
 	], buffer);

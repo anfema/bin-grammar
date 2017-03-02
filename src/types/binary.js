@@ -1,4 +1,4 @@
-const { UInt } = require('./uint');
+const { uint } = require('./uint');
 
 // Binary data
 //
@@ -9,9 +9,10 @@ const { UInt } = require('./uint');
 // bigEndian: override big endian encoding for the size prefix
 // sizeFieldTransform: transform function to call before using the value of the size field
 // transform: result value transform function to call on the data before returning it as result
+// reverseTransform: reverse of the transform function to be used in encoding
 //
 // returns: parser function that returns transformed buffer
-function Binary(name,
+function binary(name,
 	{
 		size,
 		sizeField,
@@ -20,14 +21,15 @@ function Binary(name,
 		sizePrefixBigEndian,
 		sizeFieldTransform = value => value,
 		transform = value => value,
+		reverseTransform = value => value,
 	} = {}
 ) {
-	return function (buffer, parseTree, { bigEndian }) {
+	function parse(buffer, parseTree, { bigEndian }) {
 		let offset = 0;
 
 		// determine size to copy to result buffer
 		if (sizePrefixed) {
-			const prefixParser = UInt('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
+			const { parse: prefixParser } = uint('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
 			const result = prefixParser(buffer, {}, { bigEndian });
 
 			size = result.value;
@@ -47,11 +49,58 @@ function Binary(name,
 
 		// return result
 		return {
-			name,
 			value: transform(result),
 			size: size + offset,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+		if (sizePrefixed) {
+			size = object.length + sizePrefixLength;
+		}
+		if (size === undefined) {
+			size = object.length;
+		}
+
+		if (sizeField) {
+			parseTree[sizeField] = size;
+		}
+	}
+
+	function encode(object, { bigEndian }) {
+		const transformed = reverseTransform(object);
+		const bufferItems = [transformed];
+
+		if (sizePrefixed) {
+			const { encode: prefixEncoder } = uint('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
+			const result = prefixEncoder(transformed.length, { bigEndian });
+
+			bufferItems.unshift(result);
+			size = transformed.length + sizePrefixLength;
+		}
+		if (size === undefined) {
+			size = transformed.length;
+		}
+
+		// build buffer
+		let data = Buffer.concat(bufferItems);
+
+		if (data.length < size) {
+			// if the buffer was shorter than anticipated, pad with zeroes
+			data = Buffer.concat([data, Buffer.alloc(size - data.length)]);
+		} else if (data.length > size) {
+			// if the buffer was longer just cut it off
+			data = data.slice(0, size);
+		}
+
+		return data;
+	}
+
+	function makeStruct() {
+		return Buffer.alloc(0);
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // Packed BCD number
@@ -65,9 +114,10 @@ function Binary(name,
 // sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeFieldTransform: transform function to call before using the value of the size field
 // transform: result value transform function to call on the data before returning it as result
+// reverseTransform: reverse of the transform function to be used in encoding
 //
 // returns: parser function that returns transformed BCD number
-function BCD(name,
+function bcd(name,
 	{
 		size,
 		sizeField,
@@ -76,9 +126,10 @@ function BCD(name,
 		sizePrefixBigEndian,
 		sizeFieldTransform = value => value,
 		transform = value => value,
+		reverseTransform = value => value,
 	}
 ) {
-	return Binary(name, {
+	return binary(name, {
 		size,
 		sizeField,
 		sizePrefixed,
@@ -94,11 +145,12 @@ function BCD(name,
 
 			return transform(result);
 		},
+		reverseTransform: value => Buffer.from(reverseTransform(value).toString(10), 'hex'),
 	});
 }
 
 // export everything
 module.exports = {
-	Binary,
-	BCD,
+	binary,
+	bcd,
 };

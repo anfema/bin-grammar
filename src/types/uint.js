@@ -3,20 +3,22 @@
 // size: byte length
 // bigEndian: override big endian encoding
 // transform: value transformer function gets the parsed value as parameter, returns new value
+// reverseTransform: reverse of the transform function for encoding
 //
 // returns: parser function that returns a transformed unsigned integer
-function UInt(name,
+function uint(name,
 	{
 		size = 1,
 		bigEndian,
 		transform = value => value,
+		reverseTransform = value => value,
 	} = {}
 ) {
 	if ((size < 1) || (size > 4)) {
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
+	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let value = 0;
 
 		if (bigEndian === undefined) {
@@ -32,11 +34,37 @@ function UInt(name,
 		}
 
 		return {
-			name,
 			value: transform(value),
 			size,
 		};
 	};
+
+	function prepareEncode(object, parseTree) { }
+
+	function encode(object, { bigEndian: inheritBigEndian }) {
+		const data = Buffer.alloc(size);
+		const value = reverseTransform(object);
+
+		if (bigEndian === undefined) {
+			bigEndian = inheritBigEndian;
+		}
+
+		for (let i = 0; i < size; i += 1) {
+			if (bigEndian) {
+				data[i] = (value >> ((size - i - 1) * 8)) & 0xff;
+			} else {
+				data[i] = (value >> (i * 8)) & 0xff;
+			}
+		}
+
+		return data;
+	}
+
+	function makeStruct() {
+		return reverseTransform(0);
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // 8 Bit Unsigned Integer
@@ -44,8 +72,8 @@ function UInt(name,
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns a transformed unsigned integer
-function UInt8(name, { transform = value => value } = {}) {
-	return UInt(name, { size: 1, transform });
+function uint8(name, { transform = value => value } = {}) {
+	return uint(name, { size: 1, transform });
 }
 
 // 16 Bit Unsigned Integer
@@ -54,8 +82,8 @@ function UInt8(name, { transform = value => value } = {}) {
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns a transformed unsigned integer
-function UInt16(name, { bigEndian, transform = value => value } = {}) {
-	return UInt(name, { size: 2, bigEndian, transform });
+function uint16(name, { bigEndian, transform = value => value } = {}) {
+	return uint(name, { size: 2, bigEndian, transform });
 }
 
 // 32 Bit Unsigned Integer
@@ -64,14 +92,14 @@ function UInt16(name, { bigEndian, transform = value => value } = {}) {
 // transform: value transformer function gets the parsed value as parameter, returns new value
 //
 // returns: parser function that returns a transformed unsigned integer
-function UInt32(name, { bigEndian, transform = value => value } = {}) {
-	return UInt(name, { size: 4, bigEndian, transform });
+function uint32(name, { bigEndian, transform = value => value } = {}) {
+	return uint(name, { size: 4, bigEndian, transform });
 }
 
 // export everything
 module.exports = {
-	UInt,
-	UInt8,
-	UInt16,
-	UInt32,
+	uint,
+	uint8,
+	uint16,
+	uint32,
 };

@@ -1,3 +1,5 @@
+const { uint } = require('./uint');
+
 // Loop over a sub-struct
 //
 // struct: the structure that repeats
@@ -8,7 +10,7 @@
 // repetitionsField: field in the parse tree that defines the repetition count
 //
 // returns: parser function that returns array of parsed items
-function Loop(name,
+function loop(name,
 	{
 		struct,
 		repetitions = Infinity,
@@ -18,7 +20,7 @@ function Loop(name,
 		repetitionsBigEndian,
 	}
 ) {
-	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
+	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let offset = 0;
 
 		if (repetitionsBigEndian === undefined) {
@@ -27,9 +29,9 @@ function Loop(name,
 
 		// determine how many repetitions we want
 		if (repetitionsPrefixed) {
-			const prefixParser = UInt('prefix', {
+			const prefixParser = uint('prefix', {
 				size: repetitionsPrefixLength,
-				bigEndian: repetitionsBigEndian
+				bigEndian: repetitionsBigEndian,
 			});
 			const result = prefixParser(buffer);
 
@@ -49,11 +51,11 @@ function Loop(name,
 			let parserOffset = 0;
 
 			// loop over items in the sub struct
-			for (const item of struct) {
+			for (const { parse: parseItem, name: itemName } of struct) {
 				const slice = data.slice(parserOffset, data.length);
-				const r = item(slice, loopResult, { bigEndian: inheritBigEndian });
+				const r = parseItem(slice, loopResult, { bigEndian: inheritBigEndian });
 
-				loopResult[r.name] = r.value;
+				loopResult[itemName] = r.value;
 				parserOffset += r.size;
 			}
 
@@ -68,12 +70,25 @@ function Loop(name,
 
 		// return result array
 		return {
-			name,
 			value: result,
 			size: offset,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+		// TODO: update repetitions field
+	}
+
+	function encode(object, { bigEndian }) {
+		// TODO: encode loop
+	}
+
+	function makeStruct() {
+		// TODO: make struct for loop
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // export everything
-module.exports = Loop;
+module.exports = loop;

@@ -4,18 +4,20 @@
 // field: field to check for value
 // sizeField: size field from parse tree
 // sizeFieldTransfrom: transform function to modify the size field value before using it
+// sizeFieldReverseTransform: reverse of the transform function for encoding
 //
 // returns: parser function that returns parsed sub-structure
-function Selector(name,
+function selector(name,
 	{
 		select,
 		field,
 		flatten = false,
 		sizeField,
-		sizeFieldTransform = (value) => value,
+		sizeFieldTransform = value => value,
+		sizeFieldReverseTransform = value => value,
 	}
 ) {
-	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
+	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let size = buffer.length;
 
 		if (sizeField) {
@@ -38,21 +40,21 @@ function Selector(name,
 				let offset = 0;
 				let result = {};
 
-				for (const item of struct) {
+				// TODO: fix loop
+				for (const { parse: parseItem, name: itemName } of struct) {
 					const slice = data.slice(offset, data.length);
-					const r = item(slice, result, { bigEndian: inheritBigEndian });
+					const r = parseItem(slice, result, { bigEndian: inheritBigEndian });
 
 					if ((struct.length === 1) && flatten) {
 						result = r.value;
 					} else {
-						result[r.name] = r.value;
+						result[itemName] = r.value;
 					}
 					offset += r.size;
 				}
 
 				// return result
 				return {
-					name,
 					value: result,
 					size: offset,
 				};
@@ -61,12 +63,25 @@ function Selector(name,
 
 		// case not found return `null`
 		return {
-			name,
 			value: null,
 			size,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+		// TODO: update size field
+	}
+
+	function encode(object, { bigEndian }) {
+		return Buffer.alloc(0);
+	}
+
+	function makeStruct() {
+		return Buffer.alloc(0);
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // export everything
-module.exports = Selector;
+module.exports = selector;

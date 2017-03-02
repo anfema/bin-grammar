@@ -5,7 +5,7 @@
 // bigEndian: override big endian encoding, else little endian encoded
 //
 // returns: parser function that returns key of choice or `null` if not in the enum
-function Enum(name,
+function enumeration(name,
 	{
 		size = 1,
 		choices,
@@ -16,7 +16,7 @@ function Enum(name,
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
+	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let value = 0;
 
 		if (bigEndian === undefined) {
@@ -47,12 +47,39 @@ function Enum(name,
 
 		// no case matches, return `null`
 		return {
-			name,
 			value: null,
 			size,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+	}
+
+	function encode(object, { bigEndian: inheritBigEndian }) {
+		const value = choices[object];
+		const data = Buffer.alloc(size);
+
+		if (bigEndian === undefined) {
+			bigEndian = inheritBigEndian;
+		}
+
+		for (let i = 0; i < size; i += 1) {
+			if (bigEndian) {
+				data[i] = (value >> ((size - i - 1) * 8)) & 0xff;
+			} else {
+				data[i] = (value >> (i * 8)) & 0xff;
+			}
+		}
+
+		return data;
+	}
+
+	function makeStruct() {
+		return null;
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // export everything
-module.exports = Enum;
+module.exports = enumeration;

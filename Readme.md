@@ -1,4 +1,4 @@
-# Binary Data Parser
+# Binary Data Parser and Encoder
 
 This project implements a DSL for specifying binary grammars to generate parsers for binary data in node.js.
 
@@ -8,6 +8,8 @@ There are some other projects that do similar things:
   to describe the grammar
 - [binary](https://www.npmjs.com/package/binary), has a chained interface but gets complicated
   once you have more dynamic data structures
+
+This library can encode binary data in addition to decoding.
 
 ## How to install
 
@@ -60,8 +62,8 @@ chunks:
 
 ```javascript
 const pngGrammar = [
-	Magic('magic', { data: Buffer.from('89504e470d0a1a0a', 'hex') }),
-	Loop('chunks', { struct: chunkGrammar })
+	magic('magic', { data: Buffer.from('89504e470d0a1a0a', 'hex') }),
+	loop('chunks', { struct: chunkGrammar })
 ];
 ```
 
@@ -71,10 +73,10 @@ To parse a chunk we can use the following grammar:
 
 ```javascript
 const chunkGrammar = [
-	UInt32('length'),
-	CRC32('crc', [
-		BinString('name', { size: 4 }),
-		Selector('data', {
+	uint32('length'),
+	crc32('crc', [
+		binString('name', { size: 4 }),
+		selector('data', {
 			sizeField: 'length',
 			field: 'name',
 			flatten: true,
@@ -104,23 +106,23 @@ The chunk grammars are set up like this:
 ```javascript
 // header
 const ihdrGrammar = [
-	UInt32('width'),
-	UInt32('height'),
-	UInt8('bitDepth'),
-	Enum('colorType', { choices: {
+	uint32('width'),
+	uint32('height'),
+	uint8('bitDepth'),
+	enumeration('colorType', { choices: {
 		greyscale: 0,
 		trueColor: 2,
 		indexedColor: 3,
 		grayscaleWithAlpha: 4,
 		trueColorWithAlpha: 6
 	} }),
-	Enum('compressionMethod', { choices: { deflate: 0 } }),
-	Enum('filterMethod', { choices: { adaptive: 0 } }),
-	Enum('interlaceMethod', { choices: { none: 0, adam7: 1 } }),
+	enumeration('compressionMethod', { choices: { deflate: 0 } }),
+	enumeration('filterMethod', { choices: { adaptive: 0 } }),
+	enumeration('interlaceMethod', { choices: { none: 0, adam7: 1 } }),
 ]
 
 // binary image data
-const idatGrammar = [Binary('data')];
+const idatGrammar = [binary('data')];
 
 // no content
 const iendGrammar = [];
@@ -130,7 +132,7 @@ Let's begin with the shortest grammar `IEND` which is empty, because the end mar
 contain any data.
 
 The data chunk (`IDAT`) just contains the compressed image data, which we would decompress and
-decode after parsing the file structure. In this example we just define it as `Binary` data and
+decode after parsing the file structure. In this example we just define it as `binary` data and
 ignore it. As we defined that the selector should flatten the tree, the data is saved directly into
 the `data` field on the toplevel.
 
@@ -144,7 +146,7 @@ To finally apply that grammar stack to our buffer we just call the parser and ge
 object with the results back:
 
 ```javascript
-const result = BinParser(pngGrammar, buffer);
+const result = parse(pngGrammar, buffer);
 ```
 
 The `result` is something like this:
@@ -191,7 +193,7 @@ The `result` is something like this:
 
 ## Parser interface
 
-- Function name: `BinParser`
+- Function name: `parse`
 - Parameters:
 	- `definition`: the grammar to use
 	- `buffer`: the buffer to parse
@@ -213,31 +215,69 @@ The following datatypes are defined in the library, you can define your own like
 // This example just returns a buffer slice which is sent through
 // the `transform`-function.
 //
-// buffer: contains the buffer slice to parse, usually the buffer
-//         is sliced from the current offset to the end of the buffer
-// parseTree: contains the parse tree that has been generated before
-//            this parser function is called. Used to access external
-//            size fields, etc.
-// options:
-//  - `bigEndian`: Big endian setting from the parser to inherit from
-//                 when not explicitly set
-//
-// The parse function returns the field name, the parsed value and
-// the number of bytes consumed in the process.
-function CustomType(name, { size = 1, transform = value => value } = {}) {
-	return function (buffer, parseTree, { bigEndian: inheritBigEndian }) {
+// The type function returns a Javascript Object with the following functions:
+//  - `parse`: the parse function
+//  - `prepareEncode`: called before the `encode` function, to update `sizeField` type external fields
+//  - `encode`: encode a object into a buffer
+//  - `makeStruct`: make an empty structure for this item (used by the `template` function)
+//  - `name`: the name of the field
+function customType(name, { size = 1, transform = value => value, reverseTransform = value => value } = {}) {
+
+	// this function is called to parse a buffer
+	//
+	// buffer: buffer slice to parse
+	// parseTree: the tree of objects already parsed
+	// options:
+	//  - `bigEndian`: Big endian setting from the parser to inherit from
+	//                 when not explicitly set
+	//
+	// returns: Object with `value` and `size`
+	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		return {
-			name,
 			value: transform(buffer.slice(0, size)),
 			size,
 		};
 	};
+
+	// this function is called before encoding an object
+	// Attention: The only effect of this function is the side effect on the `parseTree`
+	//
+	// object: the object to encode
+	// parseTree: the template/object tree
+	//
+	// returns: nothing
+	function prepareEncode(object, parseTree) {
+		// nothing to do
+	}
+
+	// this is called to encode a object
+	//
+	// object: the object to encode
+	// options:
+	//  - `bigEndian`: Big endian setting from the parser to inherit from
+	//                 when not explicitly set
+	//
+	// returns: Buffer with encoded object
+	function encode(object, { bigEndian }) {
+		return reverseTransform(object);
+	}
+
+	// this is called by the template function to build a template tree
+	// loops will get a single item, selectors will get no items
+	//
+	// returns: structure a call to parse would yield on this type
+	function makeStruct() {
+		return Buffer.alloc(0);
+	}
+
+	// return all the functions
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 ```
 
-### Binary data
+### binary data
 
-- Type name: `Binary`
+- Type name: `binary`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -252,7 +292,7 @@ function CustomType(name, { size = 1, transform = value => value } = {}) {
 
 ### Strings
 
-- Type name: `BinString`
+- Type name: `binString`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -273,7 +313,7 @@ function CustomType(name, { size = 1, transform = value => value } = {}) {
 
 Signed integers are two's complement, which means if the first bit is a one the value is negative.
 
-- Generic type name: `Int`
+- Generic type name: `int`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -281,7 +321,7 @@ Signed integers are two's complement, which means if the first bit is a one the 
 	- `size`: byte length
 	- `bigEndian`: override big endian encoding (default: as defined in parser)
 	- `transform`: value transformer function gets the parsed value as parameter
-- Specialized types: `Int8` (8 Bit integer), `Int16` (16 Bit integer), `Int32` (32 Bit integer)
+- Specialized types: `int8` (8 Bit integer), `int16` (16 Bit integer), `int32` (32 Bit integer)
 
 Attention: The `size` may not be bigger than `4` (32 Bits) as Javascript only guarantees bit operations
 to be accurate to that size. If you need bigger types you'll have to define your own types using a
@@ -289,7 +329,7 @@ big number library of your choosing.
 
 #### Unsigned Integers
 
-- Generic type name: `UInt`
+- Generic type name: `uint`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -297,7 +337,7 @@ big number library of your choosing.
 	- `size`: byte length
 	- `bigEndian`: override big endian encoding (default: as defined in parser)
 	- `transform`: value transformer function gets the parsed value as parameter
-- Specialized types: `UInt8` (8 Bit integer), `UInt16` (16 Bit integer), `UInt32` (32 Bit integer)
+- Specialized types: `uint8` (8 Bit integer), `uint16` (16 Bit integer), `uint32` (32 Bit integer)
 
 Attention: The `size` may not be bigger than `4` (32 Bits) as Javascript only guarantees bit operations
 to be accurate to that size. If you need bigger types you'll have to define your own types using a
@@ -305,7 +345,7 @@ big number library of your choosing.
 
 #### IEEE Floats and Doubles
 
-- Generic type name: `Float`
+- Generic type name: `float`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -313,11 +353,11 @@ big number library of your choosing.
 	- `size`: byte length (either 4 or 8, as IEEE does not define other lengths, default: `4`)
 	- `bigEndian`: override big endian encoding (default: as defined in parser)
 	- `transform`: value transformer function gets the parsed value as parameter
-- Specialized type: `Double` (8 byte IEEE double)
+- Specialized type: `double` (8 byte IEEE double)
 
 #### BCD and ASCII numbers
 
-- Type name: `BCD`
+- Type name: `bcd`
 - Decodes BCD encoded numbers: `0x12 0x34` decodes to `1234`
 - Parameters:
 	- `name`: Name of the field
@@ -333,7 +373,7 @@ big number library of your choosing.
 
 ---
 
-- Type name: `ASCIIInteger`
+- Type name: `asciiInteger`
 - Decodes _Human readable_ integers: `0x31 0x32 0x33 0x34` decodes to `1234`
 - Parameters:
 	- `name`: Name of the field
@@ -350,7 +390,7 @@ big number library of your choosing.
 
 ---
 
-- Type name: `ASCIIFloat`
+- Type name: `asciiFloat`
 - Decodes _Human readable_ floats: `0x31 0x32 0x33 0x34 0x2E 0x35 0x36` decodes to `1234.56`
 - Parameters:
 	- `name`: Name of the field
@@ -367,7 +407,7 @@ big number library of your choosing.
 
 ### Fixed bytes / Magic bytes
 
-- Type name: `Magic`
+- Type name: `magic`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -378,7 +418,7 @@ big number library of your choosing.
 
 ### Binary types
 
-- Type name: `BitMask`
+- Type name: `bitMask`
 - Decodes a list of bits into readable flags
 - Parameters:
 	- `name`: Name of the field
@@ -389,7 +429,7 @@ big number library of your choosing.
 
 ---
 
-- Type name: `Enum`
+- Type name: `enumeration`
 - Decodes a value into a readable enumeration value
 - Parameters:
 	- `name`: Name of the field
@@ -402,11 +442,11 @@ big number library of your choosing.
 ### Byte deconstruction
 
 Use these types if you want to act on Bit-sizes instead of Bytes. These types only work within a
-`BitStruct` container.
+`bitStruct` container.
 
 ---
 
-- Type name: `BitStruct`
+- Type name: `bitStruct`
 - Acts as a container for Bit types
 - Parameters:
 	- `name`: Name of the field
@@ -419,7 +459,7 @@ Use these types if you want to act on Bit-sizes instead of Bytes. These types on
 
 ---
 
-- Sub-type name: `BitFlag`
+- Sub-type name: `bitFlag`
 - A one bit flag value
 - Parameters:
 	- `name`: Name of the field
@@ -427,7 +467,7 @@ Use these types if you want to act on Bit-sizes instead of Bytes. These types on
 
 ---
 
-- Sub-type name: `BitInt`
+- Sub-type name: `bitInt`
 - Signed integer (two's complement, negative if first bit is set)
 - Parameters:
 	- `name`: Name of the field
@@ -438,7 +478,7 @@ Use these types if you want to act on Bit-sizes instead of Bytes. These types on
 
 ---
 
-- Sub-type name: `BitUInt`
+- Sub-type name: `bitUInt`
 - Unsigned integer
 - Parameters:
 	- `name`: Name of the field
@@ -449,7 +489,7 @@ Use these types if you want to act on Bit-sizes instead of Bytes. These types on
 
 ---
 
-- Sub-type name: `BitEnum`
+- Sub-type name: `bitEnum`
 - Enumeration of values
 - Parameters:
 	- `name`: Name of the field
@@ -460,7 +500,7 @@ Use these types if you want to act on Bit-sizes instead of Bytes. These types on
 
 ---
 
-- Sub-type name: `BitBitMask`
+- Sub-type name: `bitBitMask`
 - List of flags
 - Parameters:
 	- `name`: Name of the field
@@ -471,9 +511,9 @@ Use these types if you want to act on Bit-sizes instead of Bytes. These types on
 
 ## Loops
 
-Use `Loop` elements if a list of elements repeats.
+Use `loop` elements if a list of elements repeats.
 
-- Type name: `Loop`
+- Type name: `loop`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -487,9 +527,9 @@ Use `Loop` elements if a list of elements repeats.
 
 ## Switch statements
 
-Use a `Selector` to switch between grammars based on a field.
+Use a `selector` to switch between grammars based on a field.
 
-- Type name: `Selector`
+- Type name: `selector`
 - Parameters:
 	- `name`: Name of the field
 	- `options`: Options object
@@ -506,27 +546,26 @@ CRC types wrap a list of other elements over which the CRC is calculated. The CR
 to follow the wrapped fields immediately. The result of the CRC function is either `true` if the
 CRC matches or `false` if it does not.
 
-- Generic type name: `CRC`
+- Generic type name: `crc`
 - Parameters:
 	- `name`: Name of the CRC field
 	- `elements`: Array, list of elements to calculate the CRC over
 	- `crcSize`: size of the CRC in bytes
 	- `crcFunction`: function to calculate the CRC, gets a buffer slice with the data to check
 - Specialized types:
-	- `CRC32`
-	- `CRC24`
-	- `CRC16`
-	- `CRC16_CCITT`
-	- `CRC16_Modbus`
-	- `CRC16_Kermit`
-	- `CRC16_XModem`
-	- `CRC8`
-	- `CRC8_1Wire`
-	- `CRC8_XOR` (Not really a CRC but used in some protocols as a parity value)
+	- `crc32`
+	- `crc24`
+	- `crc16`
+	- `crc16CCITT`
+	- `crc16Modbus`
+	- `crc16Kermit`
+	- `crc16XModem`
+	- `crc8`
+	- `crc81Wire`
+	- `crc8XOR` (Not really a CRC but used in some protocols as a parity value)
 
-## TODO
 
-- Allow re-construction of binary data from a result object and a parse definition
-	- Problem 1: reversing the transform functions
-	- Problem 2: grammars are layed out as parsing functions, needs to be a parser and a encoder.
-	  this will probably change the API to define your own types, so version will increment to 2.0
+# TODO
+
+- Document encoding of objects
+- Document templating functions

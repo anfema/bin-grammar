@@ -1,4 +1,4 @@
-const { UInt } = require('./uint');
+const { uint } = require('./uint');
 
 // String
 //
@@ -10,10 +10,12 @@ const { UInt } = require('./uint');
 // sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeField: field in the parse tree that defines the size
 // sizeFieldTransform: transform function applied to the size field before using the value
+// sizeFieldReverseTransform: reverse of the transform function for encoding
 // transform: transform function applied before returning the string
+// reverseTransform: reverse of the transform function for encoding
 //
 // returns: parser function that returns transformed string (if `nullTerminated` = true, cut off at the first zero)
-function BinString(name,
+function binString(name,
 	{
 		size = 0,
 		encoding = 'ascii',
@@ -23,14 +25,16 @@ function BinString(name,
 		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform = value => value,
+		sizeFieldReverseTransform = value => value,
 		transform = value => value,
+		reverseTransform = value => value,
 	}
 ) {
 	if ((size === 0) && (nullTerminated === false) && (sizeField === undefined) && (sizePrefixed === false)) {
 		throw new Error('Invalid string parser invocation, you have to specify `size` or `sizeField` or set `nullTerminated` to `true` or have a size prefix');
 	}
 
-	return function (buffer, parseTree, { bigEndian: inheritBigEndian}) {
+	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let offset = 0;
 
 		if (sizePrefixBigEndian === undefined) {
@@ -38,7 +42,7 @@ function BinString(name,
 		}
 
 		if (sizePrefixed) {
-			const prefixParser = UInt('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
+			const prefixParser = uint('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian }).parse;
 			const result = prefixParser(buffer, {}, { bigEndian: inheritBigEndian });
 
 			size = result.value;
@@ -62,7 +66,6 @@ function BinString(name,
 			}
 
 			return {
-				name,
 				value: transform(buffer.toString(encoding, offset, end)),
 				size: size + offset,
 			};
@@ -79,20 +82,32 @@ function BinString(name,
 			}
 
 			return {
-				name,
 				value: transform(buffer.toString(encoding, 0, end)),
 				size,
 			};
 		} else if (sizePrefixed) {
 			// zero length string is possible, so return zero string
 			return {
-				name,
 				value: transform(''),
 				size: offset,
 			};
 		}
 		throw new Error('Invalid size, `sizeField` not found?');
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+		// TODO: update size field
+	}
+
+	function encode(object, { bigEndian }) {
+		// TODO: encode string
+	}
+
+	function makeStruct() {
+		return reverseTransform('');
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // ASCII encoded integer (aka. human readable number)
@@ -104,10 +119,12 @@ function BinString(name,
 // sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeField: field in the parse tree that defines the size
 // sizeFieldTransform: transform function applied to the size field before using the value
+// sizeFieldReverseTransform: reverse of the transform function for encoding
 // transform: transform function applied before returning the number
+// reverseTransform: reverse of the transform function for encoding
 //
 // returns: parser function that returns transformed number
-function ASCIIInteger(name,
+function asciiInteger(name,
 	{
 		size = 0,
 		nullTerminated = false,
@@ -116,10 +133,12 @@ function ASCIIInteger(name,
 		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform = value => value,
+		sizeFieldReverseTransform = value => value,
 		transform = value => value,
+		reverseTransform = value => value,
 	}
 ) {
-	return BinString(name, {
+	return binString(name, {
 		size,
 		nullTerminated,
 		sizePrefixed,
@@ -127,7 +146,9 @@ function ASCIIInteger(name,
 		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform,
+		sizeFieldReverseTransform,
 		transform: value => transform(parseInt(value, 10)),
+		reverseTransform: value => reverseTransform(value).toString(10),
 	});
 }
 
@@ -140,10 +161,12 @@ function ASCIIInteger(name,
 // sizePrefixBigEndian: override big endian encoding for the size prefix
 // sizeField: field in the parse tree that defines the size
 // sizeFieldTransform: transform function applied to the size field before using the value
+// sizeFieldReverseTransform: reverse of the transform function for encoding
 // transform: transform function applied before returning the number
+// reverseTransform: reverse of the transform function for encoding
 //
 // returns: parser function that returns transformed number
-function ASCIIFloat(name,
+function asciiFloat(name,
 	{
 		size = 0,
 		nullTerminated = false,
@@ -152,10 +175,12 @@ function ASCIIFloat(name,
 		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform = value => value,
+		sizeFieldReverseTransform = value => value,
 		transform = value => value,
+		reverseTransform = value => value,
 	}
 ) {
-	return BinString(name, {
+	return binString(name, {
 		size,
 		nullTerminated,
 		sizePrefixed,
@@ -163,13 +188,15 @@ function ASCIIFloat(name,
 		sizePrefixBigEndian,
 		sizeField,
 		sizeFieldTransform,
+		sizeFieldReverseTransform,
 		transform: value => transform(parseFloat(value)),
+		reverseTransform: value => reverseTransform(value).toString(10),
 	});
 }
 
 // export everything
 module.exports = {
-	BinString,
-	ASCIIInteger,
-	ASCIIFloat,
+	binString,
+	asciiInteger,
+	asciiFloat,
 };

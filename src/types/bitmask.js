@@ -4,7 +4,7 @@
 // bitfield: Object, key: flag name, value: bit number
 //
 // returns: parser function that returns array of set keys
-function Bitmask(name,
+function bitmask(name,
 	{
 		size = 1,
 		bitfield,
@@ -14,7 +14,7 @@ function Bitmask(name,
 		throw new Error('Javascript bit operations are only safe to 32 bits, so we can\'t do sizes over that');
 	}
 
-	return function (buffer, parseTree, { bigEndian }) {
+	function parse(buffer, parseTree, { bigEndian }) {
 		const result = [];
 		let value = 0;
 
@@ -34,12 +34,38 @@ function Bitmask(name,
 
 		// return result
 		return {
-			name,
 			value: result,
 			size,
 		};
-	};
+	}
+
+	function prepareEncode(object, parseTree) {
+	}
+
+	function encode(object, { bigEndian }) {
+		let value = 0;
+
+		for (const key of object) {
+			const bit = bitfield[key];
+
+			value |= (1 << (size * 8 - bit - 1));
+		}
+
+		const result = Buffer.alloc(size);
+
+		for (let i = 0; i < size; i += 1) {
+			result[i] = (value >> (i * 8)) & 0xff;
+		}
+
+		return result;
+	}
+
+	function makeStruct() {
+		return [];
+	}
+
+	return { parse, prepareEncode, encode, makeStruct, name };
 }
 
 // export everything
-module.exports = Bitmask;
+module.exports = bitmask;
