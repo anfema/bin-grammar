@@ -1,9 +1,9 @@
 const test = require('ava');
-const { parse, bitStruct, bitFlag, bitInt, bitUInt, bitEnum, bitBitMask } = require('../index');
+const { parse, encode, template, bitStruct, bitFlag, bitInt, bitUInt, bitEnum, bitBitMask } = require('../index');
+const { compareTemplate } = require('../src/helper.js');
 
 test('bit_flags', (t) => {
-	const buffer = Buffer.from('05', 'hex');
-	const result = parse([
+	const definition = [
 		bitStruct('bit', {
 			size: 1,
 			elements: [
@@ -17,7 +17,9 @@ test('bit_flags', (t) => {
 				bitFlag('bit8'),
 			],
 		}),
-	], buffer);
+	];
+	const buffer = Buffer.from('05', 'hex');
+	const result = parse(definition, buffer);
 
 	t.is(result.bit.bit1, false);
 	t.is(result.bit.bit2, false);
@@ -27,11 +29,15 @@ test('bit_flags', (t) => {
 	t.is(result.bit.bit6, true);
 	t.is(result.bit.bit7, false);
 	t.is(result.bit.bit8, true);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
+	t.is(compareTemplate(template(definition), { bit: { bit1: null, bit2: null, bit3: null, bit4: null, bit5: null, bit6: null, bit7: null, bit8: null } }), true);
 });
 
 test('bit_int', (t) => {
-	const buffer = Buffer.from('5f', 'hex');
-	const result = parse([
+	const definition = [
 		bitStruct('bit', {
 			size: 1,
 			elements: [
@@ -39,15 +45,21 @@ test('bit_int', (t) => {
 				bitInt('int2', { size: 4 }),
 			],
 		}),
-	], buffer);
+	];
+	const buffer = Buffer.from('5f', 'hex');
+	const result = parse(definition, buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.int2, -1);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
+	t.is(compareTemplate(template(definition), { bit: { int1: null, int2: null } }), true);
 });
 
 test('bit_uint', (t) => {
-	const buffer = Buffer.from('5f', 'hex');
-	const result = parse([
+	const definition = [
 		bitStruct('bit', {
 			size: 1,
 			elements: [
@@ -55,15 +67,21 @@ test('bit_uint', (t) => {
 				bitUInt('int2', { size: 4 }),
 			],
 		}),
-	], buffer);
+	];
+	const buffer = Buffer.from('5f', 'hex');
+	const result = parse(definition, buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.int2, 15);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
+	t.is(compareTemplate(template(definition), { bit: { int1: null, int2: null } }), true);
 });
 
 test('bit_enum', (t) => {
-	const buffer = Buffer.from('5f', 'hex');
-	const result = parse([
+	const definition = [
 		bitStruct('bit', {
 			size: 1,
 			elements: [
@@ -77,15 +95,21 @@ test('bit_enum', (t) => {
 				}),
 			],
 		}),
-	], buffer);
+	];
+	const buffer = Buffer.from('5f', 'hex');
+	const result = parse(definition, buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.enum, 'all');
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
+	t.is(compareTemplate(template(definition), { bit: { int1: null, enum: null } }), true);
 });
 
 test('bit_bitmask', (t) => {
-	const buffer = Buffer.from('53', 'hex');
-	const result = parse([
+	const definition = [
 		bitStruct('bit', {
 			size: 1,
 			elements: [
@@ -101,18 +125,24 @@ test('bit_bitmask', (t) => {
 				}),
 			],
 		}),
-	], buffer);
+	];
+	const buffer = Buffer.from('53', 'hex');
+	const result = parse(definition, buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.mask.length, 2);
 	t.is(result.bit.mask[0], 'bit2');
 	t.is(result.bit.mask[1], 'bit3');
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
+	t.is(compareTemplate(template(definition), { bit: { int1: null, mask: null } }), true);
 });
 
 
 test('bit_integration', (t) => {
-	const buffer = Buffer.from('53f0', 'hex');
-	const result = parse([
+	const definition = [
 		bitStruct('bit', {
 			size: 2,
 			elements: [
@@ -136,7 +166,9 @@ test('bit_integration', (t) => {
 				bitInt('int2', { size: 6 }),
 			],
 		}),
-	], buffer);
+	];
+	const buffer = Buffer.from('53f0', 'hex');
+	const result = parse(definition, buffer);
 
 	t.is(result.bit.int1, 5);
 	t.is(result.bit.mask.length, 1);
@@ -144,4 +176,9 @@ test('bit_integration', (t) => {
 	t.is(result.bit.flag, true);
 	t.is(result.bit.enum, 'all');
 	t.is(result.bit.int2, -16);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(buffer), 0);
+	t.is(compareTemplate(template(definition), { bit: { int1: null, mask: null, flag: null, enum: null, int2: null } }), true);
 });

@@ -40,7 +40,6 @@ function selector(name,
 				let offset = 0;
 				let result = {};
 
-				// TODO: fix loop
 				for (const { parse: parseItem, name: itemName } of struct) {
 					const slice = data.slice(offset, data.length);
 					const r = parseItem(slice, result, { bigEndian: inheritBigEndian });
@@ -73,7 +72,7 @@ function selector(name,
 	}
 
 	function encode(object, { bigEndian }) {
-		return Buffer.alloc(0);
+		// TODO: encode selector
 	}
 
 	function makeStruct() {

@@ -54,8 +54,34 @@ function int(name,
 	function prepareEncode(object, parseTree) {
 	}
 
-	function encode(object, { bigEndian }) {
-		// TODO: encode int
+	function encode(object, { bigEndian: inheritBigEndian }) {
+		const data = Buffer.alloc(size);
+		let value = reverseTransform(object);
+
+		if (bigEndian === undefined) {
+			bigEndian = inheritBigEndian;
+		}
+
+		// two's complement (yeah magic)
+		if (value < 0) {
+			let mask = 0;
+
+			for (let i = 0; i < size; i += 1) {
+				mask |= (0xff << (i * 8));
+			}
+			value = -((~value & mask) + 1);
+		}
+
+		// serialize
+		for (let i = 0; i < size; i += 1) {
+			if (bigEndian) {
+				data[i] = (value >> ((size - i - 1) * 8)) & 0xff;
+			} else {
+				data[i] = (value >> (i * 8)) & 0xff;
+			}
+		}
+
+		return data;
 	}
 
 	function makeStruct() {

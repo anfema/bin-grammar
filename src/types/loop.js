@@ -76,7 +76,13 @@ function loop(name,
 	}
 
 	function prepareEncode(object, parseTree) {
-		// TODO: update repetitions field
+		if (repetitions === Infinity) {
+			repetitions = object.length;
+		}
+
+		if (repetitionsField) {
+			parseTree[repetitionsField] = repetitions;
+		}
 	}
 
 	function encode(object, { bigEndian }) {
@@ -84,7 +90,7 @@ function loop(name,
 	}
 
 	function makeStruct() {
-		// TODO: make struct for loop
+		return [];
 	}
 
 	return { parse, prepareEncode, encode, makeStruct, name };

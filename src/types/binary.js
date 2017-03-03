@@ -20,6 +20,7 @@ function binary(name,
 		sizePrefixLength = 0,
 		sizePrefixBigEndian,
 		sizeFieldTransform = value => value,
+		sizeFieldReverseTransform = value => value,
 		transform = value => value,
 		reverseTransform = value => value,
 	} = {}
@@ -55,15 +56,12 @@ function binary(name,
 	}
 
 	function prepareEncode(object, parseTree) {
-		if (sizePrefixed) {
-			size = object.length + sizePrefixLength;
-		}
 		if (size === undefined) {
 			size = object.length;
 		}
 
 		if (sizeField) {
-			parseTree[sizeField] = size;
+			parseTree[sizeField] = sizeFieldReverseTransform(size);
 		}
 	}
 
@@ -125,6 +123,7 @@ function bcd(name,
 		sizePrefixLength = 0,
 		sizePrefixBigEndian,
 		sizeFieldTransform = value => value,
+		sizeFieldReverseTransform = value => value,
 		transform = value => value,
 		reverseTransform = value => value,
 	}
@@ -135,6 +134,7 @@ function bcd(name,
 		sizePrefixed,
 		sizePrefixLength,
 		sizeFieldTransform,
+		sizeFieldReverseTransform,
 		sizePrefixBigEndian,
 		transform: (value) => {
 			let result = 0;

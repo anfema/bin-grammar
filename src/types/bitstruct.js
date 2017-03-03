@@ -11,6 +11,8 @@ const { uint } = require('./uint');
 // elements: array of sub elements, only `Bit` elements allowed
 //
 // returns: parser function that returns an object with the destructured bits
+
+// FIXME: not entirely clear what happens if the container contains more data than the size
 function bitStruct(name, {
 	size = 1,
 	sizeField,
@@ -30,10 +32,10 @@ function bitStruct(name, {
 		let offset = 0;
 		const result = {};
 
-		for (const item of elements) {
-			const r = item(data, (size * 8) - offset);
+		for (const { parse: parseItem, name: itemName } of elements) {
+			const r = parseItem(data, (size * 8) - offset);
 
-			result[r.name] = r.value;
+			result[itemName] = r.value;
 			offset += r.size;
 		}
 
@@ -44,15 +46,39 @@ function bitStruct(name, {
 	}
 
 	function prepareEncode(object, parseTree) {
-		// TODO: sizefield for bitStruct
+		if (sizeField) {
+			parseTree[sizeField] = sizeFieldReverseTransform(size);
+		}
 	}
 
 	function encode(object, { bigEndian }) {
-		// TODO: encode bitstruct
+		const result = Buffer.alloc(size);
+
+		let offset = 0;
+		let accum = 0;
+
+		for (const { encode: encodeItem, name: itemName } of elements) {
+			const r = encodeItem(object[itemName], (size * 8) - offset);
+
+			accum |= r.value;
+			offset += r.size;
+		}
+
+		for (let i = 0; i < size; i += 1) {
+			result[i] = (accum >> ((size - i - 1) * 8)) & 0xff;
+		}
+
+		return result;
 	}
 
 	function makeStruct() {
-		// TODO: make struct for bitstruct
+		const result = {};
+
+		for (const { makeStruct: makeStructItem, name: itemName } of elements) {
+			result[itemName] = makeStructItem();
+		}
+
+		return result;
 	}
 
 	return { parse, prepareEncode, encode, makeStruct, name };
@@ -64,15 +90,35 @@ function bitStruct(name, {
 //
 // returns: parser function that returns a bool
 function bitFlag(name) {
-	return function (data, offset) {
+	function parse(data, offset) {
 		const result = ((data & (1 << (offset - 1))) !== 0);
 
 		return {
-			name,
 			value: result,
 			size: 1,
 		};
-	};
+	}
+
+	function encode(object, offset) {
+		let value;
+
+		if (object) {
+			value = (1 << (offset - 1));
+		} else {
+			value = 0;
+		}
+
+		return {
+			value,
+			size: 1,
+		};
+	}
+
+	function makeStruct() {
+		return false;
+	}
+
+	return { parse, encode, makeStruct, name };
 }
 
 // Sub-byte sized signed integer
@@ -82,8 +128,12 @@ function bitFlag(name) {
 // transform: value transformer function
 //
 // returns: parser function that returns a signed integer
-function bitInt(name, { size = 2, transform = (value) => value }) {
-	return function (data, offset) {
+function bitInt(name, {
+	size = 2,
+	transform = value => value,
+	reverseTransform = value => value,
+}) {
+	function parse(data, offset) {
 		let mask = 0;
 
 		for (let i = 0; i < size; i += 1) {
@@ -98,11 +148,35 @@ function bitInt(name, { size = 2, transform = (value) => value }) {
 		}
 
 		return {
-			name,
 			value: transform(result),
 			size,
 		};
-	};
+	}
+
+	function encode(object, offset) {
+		let value = reverseTransform(object);
+		let mask = 0;
+
+		for (let i = 0; i < size; i += 1) {
+			mask = (mask << 1) | 0x01;
+		}
+
+		// two's complement (yeah magic)
+		if (value < 0) {
+			value = -((~value & mask) + 1);
+		}
+
+		return {
+			value: ((value & mask) << (offset - size)),
+			size,
+		};
+	}
+
+	function makeStruct() {
+		return 0;
+	}
+
+	return { parse, encode, makeStruct, name };
 }
 
 // Sub-byte sized unsigned integer
@@ -112,8 +186,12 @@ function bitInt(name, { size = 2, transform = (value) => value }) {
 // transform: value transformer function
 //
 // returns: parser function that returns a unsigned integer
-function bitUInt(name, { size = 2, transform = (value) => value }) {
-	return function (data, offset) {
+function bitUInt(name, {
+	size = 2,
+	transform = value => value,
+	reverseTransform = value => value,
+}) {
+	function parse(data, offset) {
 		let mask = 0;
 
 		for (let i = 0; i < size; i += 1) {
@@ -123,11 +201,29 @@ function bitUInt(name, { size = 2, transform = (value) => value }) {
 		const result = (data >> (offset - size)) & mask;
 
 		return {
-			name,
 			value: transform(result),
 			size,
 		};
-	};
+	}
+
+	function encode(object, offset) {
+		let mask = 0;
+
+		for (let i = 0; i < size; i += 1) {
+			mask = (mask << 1) | 0x01;
+		}
+
+		return {
+			value: ((reverseTransform(object) & mask) << (offset - size)),
+			size,
+		};
+	}
+
+	function makeStruct() {
+		return 0;
+	}
+
+	return { parse, encode, makeStruct, name };
 }
 
 // Sub-byte sized enum
@@ -138,7 +234,7 @@ function bitUInt(name, { size = 2, transform = (value) => value }) {
 //
 // returns: parser function that returns a string of the matching enum case or `null`
 function bitEnum(name, { size = 2, choices }) {
-	return function (data, offset) {
+	function parse(data, offset) {
 		let mask = 0;
 
 		for (let i = 0; i < size; i += 1) {
@@ -161,11 +257,25 @@ function bitEnum(name, { size = 2, choices }) {
 		}
 
 		return {
-			name,
 			value: null,
 			size,
 		};
-	};
+	}
+
+	function encode(object, offset) {
+		const value = choices[object];
+
+		return {
+			value: (value << (offset - size)),
+			size,
+		};
+	}
+
+	function makeStruct() {
+		return 0;
+	}
+
+	return { parse, encode, makeStruct, name };
 }
 
 // Sub-byte sized bitmask
@@ -176,7 +286,7 @@ function bitEnum(name, { size = 2, choices }) {
 //
 // returns: parser function that returns an array of strings of set bits
 function bitBitMask(name, { size = 2, bitfield }) {
-	return function (data, offset) {
+	function parse(data, offset) {
 		const result = [];
 		let mask = 0;
 
@@ -196,11 +306,31 @@ function bitBitMask(name, { size = 2, bitfield }) {
 		}
 
 		return {
-			name,
 			value: result,
 			size,
 		};
-	};
+	}
+
+	function encode(object, offset) {
+		let value = 0;
+
+		for (const item of object) {
+			const bit = bitfield[item];
+
+			value |= (1 << (size - bit - 1));
+		}
+
+		return {
+			value: (value << (offset - size)),
+			size,
+		};
+	}
+
+	function makeStruct() {
+		return [];
+	}
+
+	return { parse, encode, makeStruct, name };
 }
 
 // export everything

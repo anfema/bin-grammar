@@ -49,8 +49,30 @@ function float(name,
 	function prepareEncode(object, parseTree) {
 	}
 
-	function encode(object, { bigEndian }) {
-		// TODO: encode float
+	function encode(object, { bigEndian: inheritBigEndian }) {
+		const buffer = Buffer.alloc(size);
+		const value = reverseTransform(object);
+
+		if (bigEndian === undefined) {
+			bigEndian = inheritBigEndian;
+		}
+
+		// we use the default reader functions of node for this
+		if (bigEndian) {
+			if (size === 4) {
+				buffer.writeFloatBE(value, 0);
+			} else {
+				buffer.writeDoubleBE(value, 0);
+			}
+		} else {
+			if (size === 4) {
+				buffer.writeFloatLE(value, 0);
+			} else {
+				buffer.writeDoubleLE(value, 0);
+			}
+		}
+
+		return buffer;
 	}
 
 	function makeStruct() {

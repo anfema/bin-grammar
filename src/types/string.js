@@ -72,18 +72,19 @@ function binString(name,
 		} else if (nullTerminated && !sizePrefixed) {
 			// variable length string with no size hint
 			let end = buffer.length;
+			let sz = size;
 
 			for(let i = 0; i < buffer.length; i += 1) {
 				if (buffer[i] === 0x00) {
 					end = i;
-					size = end + 1;
+					sz = end + 1;
 					break;
 				}
 			}
 
 			return {
 				value: transform(buffer.toString(encoding, 0, end)),
-				size,
+				size: sz,
 			};
 		} else if (sizePrefixed) {
 			// zero length string is possible, so return zero string
@@ -96,11 +97,54 @@ function binString(name,
 	}
 
 	function prepareEncode(object, parseTree) {
-		// TODO: update size field
+		if (size === undefined) {
+			size = object.length;
+		}
+
+		if (sizeField) {
+			parseTree[sizeField] = sizeFieldReverseTransform(size);
+		}
 	}
 
 	function encode(object, { bigEndian }) {
-		// TODO: encode string
+		const transformed = Buffer.from(reverseTransform(object), encoding);
+		const bufferItems = [transformed];
+
+		if (sizePrefixed) {
+			let sz = transformed.length;
+
+			if (nullTerminated) {
+				sz += 1;
+			}
+
+			const { encode: prefixEncoder } = uint('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
+			const result = prefixEncoder(sz, { bigEndian });
+
+			bufferItems.unshift(result);
+			size = sz + sizePrefixLength;
+		}
+		if (size === undefined) {
+			size = transformed.length;
+		}
+		if (nullTerminated) {
+			bufferItems.push(Buffer.alloc(1));
+			if (size === 0) {
+				size = transformed.length + 1;
+			}
+		}
+
+		// build buffer
+		let data = Buffer.concat(bufferItems);
+
+		if (data.length < size) {
+			// if the buffer was shorter than anticipated, pad with zeroes
+			data = Buffer.concat([data, Buffer.alloc(size - data.length)]);
+		} else if (data.length > size) {
+			// if the buffer was longer just cut it off
+			data = data.slice(0, size);
+		}
+
+		return data;
 	}
 
 	function makeStruct() {
