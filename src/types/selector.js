@@ -67,12 +67,73 @@ function selector(name,
 		};
 	}
 
-		// TODO: update size field
 	function prepareEncode(object, parseTree, { bigEndian }) {
+
+		// To update size field we have to actually encode the object
+		// because size is probably dynamic
+		for (const { match, struct } of select) {
+			let matched = false;
+
+			if (match instanceof Buffer) {
+				matched = (match.compare(parseTree[field]) === 0);
+			} else {
+				matched = (match === parseTree[field]);
+			}
+
+			if (matched) {
+				// case found apply struct
+				let result = Buffer.alloc(0);
+
+				// if the tree was flattened, reverse it here
+				if ((flatten) && (struct.length === 1)) {
+					const { prepareEncode: itemPrepareEncode, encode: encodeItem } = struct[0];
+
+					itemPrepareEncode(object, {}, { bigEndian });
+					const r = encodeItem(object, { bigEndian });
+
+					// to avoid encoding the whole thing again, save the result
+					// into the object
+					parseTree[`${name}`] = r;
+					if (sizeField) {
+						parseTree[sizeField] = sizeFieldReverseTransform(result.length);
+					}
+
+					return;
+				}
+
+				for (const { name: itemName, prepareEncode: itemPrepareEncode } of struct) {
+					const data = object[itemName];
+
+					itemPrepareEncode(data, object, { bigEndian });
+				}
+
+				for (const { encode: encodeItem, name: itemName } of struct) {
+					const data = object[itemName];
+					const r = encodeItem(data, { bigEndian });
+
+					result = Buffer.concat([result, r]);
+				}
+
+				// to avoid encoding the whole thing again, save the result
+				// into the object
+				parseTree[`${name}`] = result;
+				if (sizeField) {
+					parseTree[sizeField] = sizeFieldReverseTransform(result.length);
+				}
+
+				return;
+			}
+		}
+		parseTree[sizeField] = sizeFieldReverseTransform(0);
+		parseTree[`${name}`] = undefined;
 	}
 
 	function encode(object, { bigEndian }) {
-		// TODO: encode selector
+		// fetch encoded content
+		const result = object || Buffer.alloc(0);
+
+		// return the cached result
+		return result;
 	}
 
 	function makeStruct() {
