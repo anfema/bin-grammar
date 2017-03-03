@@ -55,7 +55,7 @@ function binary(name,
 		};
 	}
 
-	function prepareEncode(object, parseTree) {
+	function prepareEncode(object, parseTree, { bigEndian }) {
 		if (size === undefined) {
 			size = object.length;
 		}

@@ -75,7 +75,7 @@ function loop(name,
 		};
 	}
 
-	function prepareEncode(object, parseTree) {
+	function prepareEncode(object, parseTree, { bigEndian }) {
 		if (repetitions === Infinity) {
 			repetitions = object.length;
 		}

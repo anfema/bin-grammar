@@ -67,8 +67,8 @@ function selector(name,
 		};
 	}
 
-	function prepareEncode(object, parseTree) {
 		// TODO: update size field
+	function prepareEncode(object, parseTree, { bigEndian }) {
 	}
 
 	function encode(object, { bigEndian }) {

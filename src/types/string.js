@@ -96,7 +96,7 @@ function binString(name,
 		throw new Error('Invalid size, `sizeField` not found?');
 	}
 
-	function prepareEncode(object, parseTree) {
+	function prepareEncode(object, parseTree, { bigEndian }) {
 		if (size === undefined) {
 			size = object.length;
 		}

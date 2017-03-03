@@ -244,9 +244,12 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 	//
 	// object: the object to encode
 	// parseTree: the template/object tree
+	// options:
+	//  - `bigEndian`: Big endian setting from the parser to inherit from
+	//                 when not explicitly set
 	//
 	// returns: nothing
-	function prepareEncode(object, parseTree) {
+	function prepareEncode(object, parseTree, { bigEndian }) {
 		// nothing to do
 	}
 

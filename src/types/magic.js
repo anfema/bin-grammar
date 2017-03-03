@@ -41,7 +41,7 @@ function magic(name,
 		};
 	}
 
-	function prepareEncode(object, parseTree) {
+	function prepareEncode(object, parseTree, { bigEndian }) {
 	}
 
 	function encode(object, { bigEndian }) {

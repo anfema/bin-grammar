@@ -11,7 +11,7 @@ function encode(definition, object, { bigEndian = true } = {}) {
 	for (const { name, prepareEncode } of definition) {
 		const data = object[name];
 
-		prepareEncode(data, object);
+		prepareEncode(data, object, { bigEndian });
 	}
 
 	for (const { encode: encodeItem, name } of definition) {
