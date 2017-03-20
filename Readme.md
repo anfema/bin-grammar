@@ -21,6 +21,26 @@ If you're using `yarn`:
 
 	yarn add bin-grammar
 
+## Changelog
+
+### 3.0.0
+
+- Big internal refactoring, interface for parser functions changed substantially
+- Can now encode data to binary in addition to parsing from binary to Javascript Objects
+- Can create templates for grammars to fill and encode to binary buffers
+
+### 2.0.0
+
+- Allow for default endianness setting on parser invocation to avoid sprinkling `bigEndian: false` everywhere when parsing little endian packets. This changed the interface, so we bumped to 2.0.0
+
+### 1.1.0
+
+- Add the `flatten` option to the Selector-DataType
+
+### 1.0.1
+
+- Bugfix: off by one error when parsing variable length zero terminated strings
+
 ## How to use
 
 ### Parsing
