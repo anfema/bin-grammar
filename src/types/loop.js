@@ -32,7 +32,7 @@ function loop(name,
 			const prefixParser = uint('prefix', {
 				size: repetitionsPrefixLength,
 				bigEndian: repetitionsBigEndian,
-			});
+			}).parse;
 			const result = prefixParser(buffer);
 
 			repetitions = result.value;
@@ -86,7 +86,34 @@ function loop(name,
 	}
 
 	function encode(object, { bigEndian }) {
-		// TODO: encode loop
+		const parts = [];
+
+		if (repetitionsPrefixed) {
+			const prefixEncoder = uint('prefix', {
+				size: repetitionsPrefixLength,
+				bigEndian: repetitionsBigEndian,
+			}).encode;
+			const result = prefixEncoder(object.length, { bigEndian });
+
+			parts.push(result);
+		}
+
+		for (const loopObject of object) {
+			for (const { prepareEncode: itemPrepareEncode, name: itemName } of struct) {
+				const data = loopObject[itemName];
+
+				itemPrepareEncode(data, loopObject, { bigEndian });
+			}
+
+			for (const { encode: encodeItem, name: itemName } of struct) {
+				const data = loopObject[itemName];
+				const result = encodeItem(data, { bigEndian });
+
+				parts.push(result);
+			}
+		}
+
+		return Buffer.concat(parts);
 	}
 
 	function makeStruct() {
