@@ -28,6 +28,7 @@ If you're using `yarn`:
 - Big internal refactoring, interface for parser functions changed substantially
 - Can now encode data to binary in addition to parsing from binary to Javascript Objects
 - Can create templates for grammars to fill and encode to binary buffers
+- Names are now lowercase as eslint complains on anything that is not a class if it begins with an uppercase letter
 
 ### 2.0.0
 
