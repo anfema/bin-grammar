@@ -23,6 +23,8 @@ If you're using `yarn`:
 
 ## How to use
 
+### Parsing
+
 The example I will use here is parsing a PNG file. Why a PNG file? - It's short, useful and shows what
 this library can do.
 
@@ -51,7 +53,7 @@ Now let me explain the structure of that PNG in plain words before we start:
 
 Each chunk has it's own data format of which we will just parse the `IHDR` chunk for this example here.
 
-### Defining a grammar
+#### Defining a grammar
 
 To define a grammar you have to list the items that make up your data chunk in the order they will appear.
 This library has a lot of convenience functions to make most parsing rather easy (like zero terminated
@@ -173,11 +175,11 @@ The `result` is something like this:
       "length": 16,
       "name": "IDAT",
       "data": {
-		"type": "Buffer",
-		"data": [
-		120, 156,  98,  96,   1,   0,   0,   0,
-		255, 255,   3,   0,   0,   6,   0,   5
-		]
+        "type": "Buffer",
+        "data": [
+          120, 156,  98,  96,   1,   0,   0,   0,
+          255, 255,   3,   0,   0,   6,   0,   5
+        ]
       },
       "crc": true
     },
@@ -191,6 +193,102 @@ The `result` is something like this:
 }
 ```
 
+### Encoding
+
+To encode a Javascript object into a binary buffer we use the exact same grammar as for decoding the binary buffers into an object in the first place.
+
+For example if we use the PNG grammar from above we can re-encode the result object into a binary buffer:
+
+```javascript
+const binaryBuffer = encode(pngGrammar, result);
+
+// if we compare the original buffer with the generated output we get an exact match.
+// This outputs 0 which means the buffers match
+console.log(binaryBuffer.compare(buffer));
+```
+
+### Templating
+
+You can use the `template` function to generate an empty Javascript object that, if filled correctly, can be used to encode data.
+
+The result of a `template` call for the mentioned PNG grammar would like this:
+
+```json
+{
+  "magic": true,
+  "chunks": []
+}
+```
+
+Which does not do much, you'll have to tell the templater which items you want on which positions:
+
+```javascript
+// we want three items in the `chunks` loop, one of each chunk type in the correct order:
+const png = template(pngGrammar, { chunks: ['IHDR', 'IDAT', 'IEND'] });
+```
+
+The `png` object would then look like this:
+
+```json
+{
+  "magic": true,
+  "chunks": [
+    {
+      "length": 0,
+      "name": "IHDR",
+      "data": {
+        "width": 0,
+        "height": 0,
+        "bitDepth": 0,
+        "colorType": null,
+        "compressionMethod": null,
+        "filterMethod": null,
+        "interlaceMethod": null
+      },
+      "crc": true
+    },
+    {
+      "length": 0,
+      "name": "IDAT",
+      "data": {
+        "type": "Buffer",
+        "data": []
+      },
+      "crc": true
+    },
+    {
+      "length": 0,
+      "name": "IEND",
+      "data": {},
+      "crc": true
+    }
+  ]
+}
+```
+
+All values are set to neutral default values. Note that the length fields are all zero, those will be updated by the encoder when it knows the exact sizes of the object. `magic` and `crc` fields are just there to complete the object, the encoder will ignore the values of those fields and insert the correct magic bytes and calculated CRCs in their places.
+
+Let's fill our template and try encoding it:
+
+```javascript
+const png = template(pngGrammar, { chunks: ['IHDR', 'IDAT', 'IEND'] });
+
+png.chunks[0].data.width = 1;
+png.chunks[0].data.height = 1;
+png.chunks[0].data.bitDepth = 1;
+png.chunks[0].data.colorType = 'greyscale';
+png.chunks[0].data.compressionMethod = 'deflate';
+png.chunks[0].data.filterMethod = 'adaptive';
+png.chunks[0].data.interlaceMethod = 'none';
+png.chunks[1].data = Buffer.from('789C626001000000FFFF030000060005', 'hex');
+
+const binaryBuffer = encode(pngGrammar, png);
+
+// if we compare the original buffer with the generated output we get an exact match.
+// This outputs 0 which means the buffers match
+console.log(binaryBuffer.compare(buffer));
+```
+
 ## Parser interface
 
 - Function name: `parse`
@@ -201,6 +299,26 @@ The `result` is something like this:
 - Options:
 	- `bigEndian`: sets the default endianness of the parser (default: `true`)
 - Returns: Javascript Object with parsed structure
+
+## Encoder interface
+
+- Function name: `encode`
+- Parameters:
+	- `definition`: the grammar to use
+	- `object`: the object to encode
+	- `options`: options object
+- Options:
+	- `bigEndian`: sets the default endianness of the parser (default: `true`)
+- Returns: `Buffer` with encoded binary data
+
+
+## Templating interface
+
+- Function name: `template`
+- Parameters:
+	- `definition`: the grammar to use
+	- `subItemData`: Javascript object of sub-item data to include in the template, see example above
+- Returns: Javascript object of the structure defined by `definition`, fill this template and call `encode` with it to generate binary data
 
 ## Available data types
 
@@ -225,8 +343,8 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 
 	// this function is called to parse a buffer
 	//
-	// buffer: buffer slice to parse
-	// parseTree: the tree of objects already parsed
+	// `buffer`: buffer slice to parse
+	// `parseTree`: the tree of objects already parsed
 	// options:
 	//  - `bigEndian`: Big endian setting from the parser to inherit from
 	//                 when not explicitly set
@@ -242,8 +360,8 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 	// this function is called before encoding an object
 	// Attention: The only effect of this function is the side effect on the `parseTree`
 	//
-	// object: the object to encode
-	// parseTree: the template/object tree
+	// `object`: the object to encode
+	// `parseTree`: the template/object tree
 	// options:
 	//  - `bigEndian`: Big endian setting from the parser to inherit from
 	//                 when not explicitly set
@@ -255,7 +373,7 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 
 	// this is called to encode a object
 	//
-	// object: the object to encode
+	// `object`: the object to encode
 	// options:
 	//  - `bigEndian`: Big endian setting from the parser to inherit from
 	//                 when not explicitly set
@@ -266,10 +384,15 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 	}
 
 	// this is called by the template function to build a template tree
-	// loops will get a single item, selectors will get no items
+	// loops will get an Array for `item` with objects that should be
+	// given to the elements in the loop. All other elements will get
+	// the `item` of the loop iteration.
+	//
+	// `parseTree`: built parse tree until when this element turned up
+	// `item`: item to make a struct for, see above
 	//
 	// returns: structure a call to parse would yield on this type
-	function makeStruct() {
+	function makeStruct(parseTree, item) {
 		return Buffer.alloc(0);
 	}
 
@@ -278,7 +401,7 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 }
 ```
 
-### binary data
+### Binary data
 
 - Type name: `binary`
 - Parameters:
@@ -512,7 +635,7 @@ Use these types if you want to act on Bit-sizes instead of Bytes. These types on
 	- `size`: bit length of the bitmask
 	- `bitfield`: Object, key is the name of the flag, value is the bit number for this name
 
-## Loops
+### Loops
 
 Use `loop` elements if a list of elements repeats.
 
@@ -528,7 +651,7 @@ Use `loop` elements if a list of elements repeats.
 	- `repetitionsBigEndian`: override endianness of size prefix (default: as defined in parser)
 	- `repetitionsField`: field in the parse tree that defines the repetition count
 
-## Switch statements
+### Switch statements
 
 Use a `selector` to switch between grammars based on a field.
 
@@ -543,7 +666,7 @@ Use a `selector` to switch between grammars based on a field.
 	- `sizeField`: size field from parse tree
 	- `sizeFieldTransfrom`: transform function to modify the size field value before using it
 
-## CRCs
+### CRCs
 
 CRC types wrap a list of other elements over which the CRC is calculated. The CRC field is assumed
 to follow the wrapped fields immediately. The result of the CRC function is either `true` if the
@@ -570,5 +693,4 @@ CRC matches or `false` if it does not.
 
 # TODO
 
-- Document encoding of objects
-- Document templating functions
+- Write loop tests
