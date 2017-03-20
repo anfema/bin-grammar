@@ -95,7 +95,7 @@ function selector(name,
 					// into the object
 					parseTree[`${name}`] = r;
 					if (sizeField) {
-						parseTree[sizeField] = sizeFieldReverseTransform(result.length);
+						parseTree[sizeField] = sizeFieldReverseTransform(r.length);
 					}
 
 					return;

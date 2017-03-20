@@ -52,13 +52,21 @@ function crc(name, elements, crcSize, crcFunction) {
 	}
 
 	function prepareEncode(object, parseTree, { bigEndian }) {
-		parseTree[name] = {};
+		if ((parseTree[name] === undefined) || (parseTree[name] === true)) {
+			parseTree[name] = {};
+		}
 
+		for (const { prepareEncode: prepareEncodeItem, name: itemName } of elements) {
+			// prepare all sub items
+			prepareEncodeItem(parseTree[itemName], parseTree, { bigEndian });
+
+			// move to subtree, so we find them later
+			parseTree[name][itemName] = parseTree[itemName];
+		}
+
+		// remove original fields from parseTree as we got copies in our subtree
 		for (const { name: itemName } of elements) {
-			const item = parseTree[itemName];
-
 			parseTree[itemName] = undefined;
-			parseTree[name][itemName] = item;
 		}
 	}
 
@@ -66,10 +74,6 @@ function crc(name, elements, crcSize, crcFunction) {
 		const buffers = [];
 
 		// encode all elements and add to buffer list
-		for (const { prepareEncode: prepareEncodeItem, name: itemName } of elements) {
-			prepareEncodeItem(object[itemName], object, { bigEndian });
-		}
-
 		for (const { encode: encodeItem, name: itemName } of elements) {
 			const r = encodeItem(object[itemName], { bigEndian });
 
@@ -77,7 +81,6 @@ function crc(name, elements, crcSize, crcFunction) {
 		}
 
 		const calculated = crcFunction(Buffer.concat(buffers));
-
 
 		// write crc
 		const crcEncoder = uint('crc', { size: crcSize, bigEndian: true }).encode;
