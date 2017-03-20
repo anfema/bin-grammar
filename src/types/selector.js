@@ -136,8 +136,35 @@ function selector(name,
 		return result;
 	}
 
-	function makeStruct() {
-		return Buffer.alloc(0);
+	function makeStruct(parseTree, item) {
+		let result = {};
+
+		if (item !== undefined) {
+			for (const { match, struct } of select) {
+				let matched = false;
+
+				if (match instanceof Buffer) {
+					matched = (match.compare(parseTree[field]) === 0);
+				} else {
+					matched = (match === parseTree[field]);
+				}
+
+				if (matched) {
+					if ((struct.length === 1) && (flatten)) {
+						result = struct[0].makeStruct(parseTree);
+					} else {
+						for (const { name: partName, makeStruct: makePartStruct } of struct) {
+							result[partName] = makePartStruct(result); // FIXME: what about nested structs
+						}
+					}
+				}
+			}
+			parseTree[field] = item;
+		} else {
+			parseTree[field] = null;
+		}
+
+		return result;
 	}
 
 	return { parse, prepareEncode, encode, makeStruct, name };

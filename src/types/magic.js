@@ -49,7 +49,7 @@ function magic(name,
 	}
 
 	function makeStruct() {
-		return Buffer.from(data);
+		return true;
 	}
 
 	return { parse, prepareEncode, encode, makeStruct, name };

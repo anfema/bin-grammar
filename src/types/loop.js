@@ -116,8 +116,21 @@ function loop(name,
 		return Buffer.concat(parts);
 	}
 
-	function makeStruct() {
-		return [];
+	function makeStruct(parseTree, items) {
+		const result = [];
+
+		if (items !== undefined) {
+			for (const item of items) {
+				const obj = {};
+
+				for (const { makeStruct: makeItemStruct, name: itemName } of struct) {
+					obj[itemName] = makeItemStruct(obj, item);
+				}
+				result.push(obj);
+			}
+		}
+
+		return result;
 	}
 
 	return { parse, prepareEncode, encode, makeStruct, name };

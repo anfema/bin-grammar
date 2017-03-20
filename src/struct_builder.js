@@ -1,11 +1,12 @@
 // Build a template structure
 //
 // definition: array of type parser functions
-function makeTemplate(definition) {
+function makeTemplate(definition, subItems = {}) {
 	const result = {};
 
 	for (const { makeStruct, name } of definition) {
-		const r = makeStruct();
+		const selector = subItems[name];
+		const r = makeStruct(result, selector);
 
 		result[name] = r;
 	}

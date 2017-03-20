@@ -91,8 +91,12 @@ function crc(name, elements, crcSize, crcFunction) {
 		return data;
 	}
 
-	function makeStruct() {
-		return Buffer.alloc(crcSize);
+	function makeStruct(parseTree, item) {
+		for (const { name: itemName, makeStruct: makeItemStruct } of elements) {
+			parseTree[itemName] = makeItemStruct(parseTree, item);
+		}
+
+		return true;
 	}
 
 	return { parse, prepareEncode, encode, makeStruct, name };

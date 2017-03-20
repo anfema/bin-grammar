@@ -1,5 +1,5 @@
 const test = require('ava');
-const { parse, encode, binary, enumeration, magic, uint32, uint8, binString, loop, selector, crc32 } = require('../index');
+const { parse, encode, template, binary, enumeration, magic, uint32, uint8, binString, loop, selector, crc32 } = require('../index');
 
 //
 // chunk content parsers
@@ -89,7 +89,24 @@ test('png_parse', (t) => {
 	t.is(result.chunks[2].length, 0);
 	t.is(result.chunks[2].crc, true);
 
+	// test re-encoding the result
 	const encoded = encode(pngParser, result);
 
 	t.is(encoded.compare(buffer), 0);
+
+	// test templating
+	const png = template(pngParser, { chunks: ['IHDR', 'IDAT', 'IEND'] });
+
+	png.chunks[0].data.width = 1;
+	png.chunks[0].data.height = 1;
+	png.chunks[0].data.bitDepth = 1;
+	png.chunks[0].data.colorType = 'greyscale';
+	png.chunks[0].data.compressionMethod = 'deflate';
+	png.chunks[0].data.filterMethod = 'adaptive';
+	png.chunks[0].data.interlaceMethod = 'none';
+	png.chunks[1].data = Buffer.from('789C626001000000FFFF030000060005', 'hex');
+
+	const binaryBuffer = encode(pngParser, png);
+
+	t.is(binaryBuffer.compare(buffer), 0);
 });
