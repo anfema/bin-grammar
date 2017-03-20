@@ -51,7 +51,7 @@ function crc(name, elements, crcSize, crcFunction) {
 		};
 	}
 
-	function prepareEncode(object, parseTree) {
+	function prepareEncode(object, parseTree, { bigEndian }) {
 		parseTree[name] = {};
 
 		for (const { name: itemName } of elements) {
@@ -66,6 +66,10 @@ function crc(name, elements, crcSize, crcFunction) {
 		const buffers = [];
 
 		// encode all elements and add to buffer list
+		for (const { prepareEncode: prepareEncodeItem, name: itemName } of elements) {
+			prepareEncodeItem(object[itemName], object, { bigEndian });
+		}
+
 		for (const { encode: encodeItem, name: itemName } of elements) {
 			const r = encodeItem(object[itemName], { bigEndian });
 
