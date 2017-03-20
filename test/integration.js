@@ -1,5 +1,5 @@
 const test = require('ava');
-const { parse, binary, enumeration, magic, uint32, uint8, binString, loop, selector, crc32 } = require('../index');
+const { parse, encode, binary, enumeration, magic, uint32, uint8, binString, loop, selector, crc32 } = require('../index');
 
 //
 // chunk content parsers
@@ -15,12 +15,12 @@ const ihdrParser = [
 		trueColor: 2,
 		indexedColor: 3,
 		grayscaleWithAlpha: 4,
-		trueColorWithAlpha: 6
+		trueColorWithAlpha: 6,
 	} }),
 	enumeration('compressionMethod', { choices: { deflate: 0 } }),
 	enumeration('filterMethod', { choices: { adaptive: 0 } }),
 	enumeration('interlaceMethod', { choices: { none: 0, adam7: 1 } }),
-]
+];
 
 // binary image data
 const idatParser = [binary('data')];
@@ -55,7 +55,7 @@ const chunkParser = [
 
 const pngParser = [
 	magic('magic', { data: Buffer.from('89504e470d0a1a0a', 'hex') }),
-	loop('chunks', { struct: chunkParser })
+	loop('chunks', { struct: chunkParser }),
 ];
 
 // smallest possible 1x1 px transparent png
@@ -88,4 +88,8 @@ test('png_parse', (t) => {
 	t.is(result.chunks[2].name, 'IEND');
 	t.is(result.chunks[2].length, 0);
 	t.is(result.chunks[2].crc, true);
+
+	const encoded = encode(pngParser, result);
+
+	t.is(encoded.compare(buffer), 0);
 });
