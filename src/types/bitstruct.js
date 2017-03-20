@@ -45,7 +45,7 @@ function bitStruct(name, {
 		};
 	}
 
-	function prepareEncode(object, parseTree) {
+	function prepareEncode(object, parseTree, { bigEndian }) {
 		if (sizeField) {
 			parseTree[sizeField] = sizeFieldReverseTransform(size);
 		}
