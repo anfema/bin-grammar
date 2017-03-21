@@ -80,6 +80,8 @@ To define a grammar you have to list the items that make up your data chunk in t
 This library has a lot of convenience functions to make most parsing rather easy (like zero terminated
 strings, CRCs, Loops and Switches)
 
+You can [experiment with the example on RunKit](https://runkit.com/dunkelstern/runkit-npm-bin-grammar-example) if you like. It's the exact same code we are building here.
+
 Let's define a grammar for PNG files. We will be starting with the magic header and then loop over the
 chunks:
 
