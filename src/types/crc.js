@@ -56,11 +56,13 @@ function crc(name, elements, crcSize, crcFunction) {
 			parseTree[name] = {};
 		}
 
+		// prepare all sub items
 		for (const { prepareEncode: prepareEncodeItem, name: itemName } of elements) {
-			// prepare all sub items
 			prepareEncodeItem(parseTree[itemName], parseTree, { bigEndian });
+		}
 
-			// move to subtree, so we find them later
+		// move to subtree, so we find them later
+		for (const { name: itemName } of elements) {
 			parseTree[name][itemName] = parseTree[itemName];
 		}
 
