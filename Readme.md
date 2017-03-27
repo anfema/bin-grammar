@@ -23,6 +23,10 @@ If you're using `yarn`:
 
 ## Changelog
 
+### 3.0.1
+
+- Bugfix: If you had multiple cascaded selector elements in a crc the size field calculation did not work
+
 ### 3.0.0
 
 - Big internal refactoring, interface for parser functions changed substantially
