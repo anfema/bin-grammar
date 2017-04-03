@@ -28,12 +28,8 @@ function binString(name,
 		sizeFieldReverseTransform = value => value,
 		transform = value => value,
 		reverseTransform = value => value,
-	}
+	} = {}
 ) {
-	if ((size === 0) && (nullTerminated === false) && (sizeField === undefined) && (sizePrefixed === false)) {
-		throw new Error('Invalid string parser invocation, you have to specify `size` or `sizeField` or set `nullTerminated` to `true` or have a size prefix');
-	}
-
 	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
 		let offset = 0;
 
@@ -91,6 +87,12 @@ function binString(name,
 			return {
 				value: transform(''),
 				size: offset,
+			};
+		} else if ((size === 0) && (sizeField === undefined) && (!nullTerminated) && (!sizePrefixed)) {
+			// this is just the rest of the buffer
+			return {
+				value: transform(buffer.toString(encoding)),
+				size: buffer.length,
 			};
 		}
 		throw new Error('Invalid size, `sizeField` not found?');
