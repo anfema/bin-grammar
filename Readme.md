@@ -23,6 +23,10 @@ If you're using `yarn`:
 
 ## Changelog
 
+### 3.1.0
+
+- Allow unbounded strings that will grab the rest of the buffer (a string with no options)
+
 ### 3.0.1
 
 - Bugfix: If you had multiple cascaded selector elements in a crc the size field calculation did not work
@@ -443,6 +447,9 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 	- `sizeFieldTransform`: transform function to call before using the value of the size field
 	- `transform`: result value transform function to call on the data before returning it as result
 
+If no size is defined at all the parser just uses the rest of the buffer. You will get an exception if the
+`sizeField` is defined but does not exist though.
+
 ### Strings
 
 - Type name: `binString`
@@ -459,6 +466,9 @@ function customType(name, { size = 1, transform = value => value, reverseTransfo
 	- `sizeField`: field in the parse tree that defines the size
 	- `sizeFieldTransform`: transform function applied to the size field before using the value
 	- `transform`: transform function applied before returning the string
+
+If no size is defined at all the string parser just uses the rest of the buffer. You will get an exception if the
+`sizeField` is defined but does not exist though.
 
 ### Numbers
 
