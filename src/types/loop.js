@@ -33,7 +33,7 @@ function loop(name,
 				size: repetitionsPrefixLength,
 				bigEndian: repetitionsBigEndian,
 			}).parse;
-			const result = prefixParser(buffer);
+			const result = prefixParser(buffer, {}, { bigEndian: inheritBigEndian });
 
 			repetitions = result.value;
 			offset = result.size;
