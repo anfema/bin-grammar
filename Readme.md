@@ -23,6 +23,10 @@ If you're using `yarn`:
 
 ## Changelog
 
+### 3.1.2
+
+- Bugfix: Prefixed loops did throw an exception
+
 ### 3.1.1
 
 - Bugfix: CRC did log a mismatch sometimes even if it actually was a match.
