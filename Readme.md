@@ -23,6 +23,10 @@ If you're using `yarn`:
 
 ## Changelog
 
+### 3.1.1
+
+- Bugfix: CRC did log a mismatch sometimes even if it actually was a match.
+
 ### 3.1.0
 
 - Allow unbounded strings that will grab the rest of the buffer (a string with no options)

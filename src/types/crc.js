@@ -41,7 +41,7 @@ function crc(name, elements, crcSize, crcFunction) {
 		const checksum = r.value;
 
 		// calculate crc
-		const calculated = crcFunction(buffer.slice(0, offset)).toString(16);
+		const calculated = (`0000${crcFunction(buffer.slice(0, offset)).toString(16)}`).slice(-4);
 
 		const match = (checksum === calculated);
 

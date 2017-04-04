@@ -1,6 +1,6 @@
 {
   "name": "bin-grammar",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Binary data parser and encoder with a readable interface",
   "main": "index.js",
   "author": "Johannes Schriewer <@dunkelstern>",
