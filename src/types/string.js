@@ -159,6 +159,7 @@ function binString(name,
 // ASCII encoded integer (aka. human readable number)
 //
 // size: byte length or 0 if variable length
+// base: number base of the integer (defaults to 10)
 // nullTerminated: if size is 0 this defines a variable length string with a zero terminator
 // sizePrefixed: if set it is assumed that the string is prefixed with it's length
 // sizePrefixLength: length of the size prefix
@@ -173,6 +174,7 @@ function binString(name,
 function asciiInteger(name,
 	{
 		size = 0,
+		base = 10,
 		nullTerminated = false,
 		sizePrefixed = false,
 		sizePrefixLength = 0,
@@ -193,8 +195,8 @@ function asciiInteger(name,
 		sizeField,
 		sizeFieldTransform,
 		sizeFieldReverseTransform,
-		transform: value => transform(parseInt(value, 10)),
-		reverseTransform: value => reverseTransform(value).toString(10),
+		transform: value => transform(parseInt(value, base)),
+		reverseTransform: value => reverseTransform(value).toString(base),
 	});
 }
 

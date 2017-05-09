@@ -194,3 +194,15 @@ test('ASCIIFloat_variable_null_terminated_negative', (t) => {
 
 	t.is(encoded.compare(buffer), 0);
 });
+
+test('ASCIIInteger_variable_null_terminated_base16', (t) => {
+	const definition = [asciiInteger('int', { base: 16, nullTerminated: true })];
+	const buffer = Buffer.from('323000', 'hex');
+	const result = parse(definition, buffer);
+
+	t.is(result.int, 32);
+
+	const encoded = encode(definition, result);
+
+	t.is(encoded.compare(Buffer.from('323000', 'hex')), 0);
+});

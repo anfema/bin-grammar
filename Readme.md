@@ -23,6 +23,12 @@ If you're using `yarn`:
 
 ## Changelog
 
+### 3.2.0
+
+- Bugfix: CRC calculation failed (failed the test-suite too, how could this happen)
+- Added `base` option to `asciiinteger`
+- Code cleanup to validate with eslint
+
 ### 3.1.2
 
 - Bugfix: Prefixed loops did throw an exception
@@ -551,6 +557,7 @@ big number library of your choosing.
 	- `options`: Options object
 - Options:
 	- `size`: byte length or 0 if variable length
+	- `base`: number base, defaults to 10
 	- `nullTerminated`: if size is 0 this defines a variable length string with a zero terminator
 	- `sizePrefixed`: if set it is assumed that the string is prefixed with it's length
 	- `sizePrefixLength`: length of the size prefix
