@@ -1,18 +1,26 @@
+/* eslint-disable prefer-template */
 const test = require('ava');
 const {
-	parse, encode, template,
+	parse,
+	encode,
 	binary,
-	crc32, crc24, crc16,
-	crc16CCITT, crc16Modbus,
-	crc16Kermit, crc16XModem,
-	crc8, crc81Wire, crc8XOR,
+	crc32,
+	crc24,
+	crc16,
+	crc16CCITT,
+	crc16Modbus,
+	crc16Kermit,
+	crc16XModem,
+	crc8,
+	crc81Wire,
+	crc8XOR,
 } = require('../index');
 
 const hello = '48656C6C6F20576F726C64'; // Hello World
 
 test('crc32_success', (t) => {
 	const definition = [
-		crc32('crc', [binary('data', { size: hello.length / 2 })])
+		crc32('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '4A17B156', 'hex');
 	const result = parse(definition, buffer);
@@ -37,10 +45,9 @@ test('crc32_fail', (t) => {
 	t.is(result.crc, false);
 });
 
-
 test('crc24_success', (t) => {
 	const definition = [
-		crc24('crc', [binary('data', { size: hello.length / 2 })])
+		crc24('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + 'BA2CC4', 'hex');
 	const result = parse(definition, buffer);
@@ -67,7 +74,7 @@ test('crc24_fail', (t) => {
 
 test('crc16_success', (t) => {
 	const definition = [
-		crc16('crc', [binary('data', { size: hello.length / 2 })])
+		crc16('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '3EEB', 'hex');
 	const result = parse(definition, buffer);
@@ -94,7 +101,7 @@ test('crc16_fail', (t) => {
 
 test('crc16ccitt_success', (t) => {
 	const definition = [
-		crc16CCITT('crc', [binary('data', { size: hello.length / 2 })])
+		crc16CCITT('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '4D25', 'hex');
 	const result = parse(definition, buffer);
@@ -112,7 +119,7 @@ test('crc16ccitt_fail', (t) => {
 	const result = parse([
 		crc16CCITT('crc', [
 			binary('data', { size: hello.length / 2 }),
-		])
+		]),
 	], buffer);
 
 	t.is(result.data.length, hello.length / 2);
@@ -121,8 +128,8 @@ test('crc16ccitt_fail', (t) => {
 
 test('crc16modbus_success', (t) => {
 	const definition = [
-		crc16Modbus('crc', [binary('data', { size: hello.length / 2 })])
-	]
+		crc16Modbus('crc', [binary('data', { size: hello.length / 2 })]),
+	];
 	const buffer = Buffer.from(hello + 'DAED', 'hex');
 	const result = parse(definition, buffer);
 
@@ -148,7 +155,7 @@ test('crc16modbus_fail', (t) => {
 
 test('crc16kermit_success', (t) => {
 	const definition = [
-		crc16Kermit('crc', [binary('data', { size: hello.length / 2 })])
+		crc16Kermit('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '23C9', 'hex');
 	const result = parse(definition, buffer);
@@ -175,7 +182,7 @@ test('crc16kermit_fail', (t) => {
 
 test('crc16xmodem_success', (t) => {
 	const definition = [
-		crc16XModem('crc', [binary('data', { size: hello.length / 2 })])
+		crc16XModem('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '992A', 'hex');
 	const result = parse(definition, buffer);
@@ -202,7 +209,7 @@ test('crc16xmodem_fail', (t) => {
 
 test('crc8_success', (t) => {
 	const definition = [
-		crc8('crc', [binary('data', { size: hello.length / 2 })])
+		crc8('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '25', 'hex');
 	const result = parse(definition, buffer);
@@ -229,7 +236,7 @@ test('crc8_fail', (t) => {
 
 test('crc81wire_success', (t) => {
 	const definition = [
-		crc81Wire('crc', [binary('data', { size: hello.length / 2 })])
+		crc81Wire('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '1a', 'hex');
 	const result = parse(definition, buffer);
@@ -256,7 +263,7 @@ test('crc81wire_fail', (t) => {
 
 test('crc8xor_success', (t) => {
 	const definition = [
-		crc8XOR('crc', [binary('data', { size: hello.length / 2 })])
+		crc8XOR('crc', [binary('data', { size: hello.length / 2 })]),
 	];
 	const buffer = Buffer.from(hello + '20', 'hex');
 	const result = parse(definition, buffer);

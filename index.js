@@ -1,3 +1,4 @@
+/* eslint-disable object-property-newline */
 const parse = require('./src/parser.js');
 const encode = require('./src/encoder.js');
 const template = require('./src/struct_builder.js');

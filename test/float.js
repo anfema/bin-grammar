@@ -16,7 +16,7 @@ test('float_le', (t) => {
 });
 
 test('float_be', (t) => {
-	const definition = [float('float')]
+	const definition = [float('float')];
 	const buffer = Buffer.from('40490e56', 'hex');
 	const result = parse(definition, buffer);
 

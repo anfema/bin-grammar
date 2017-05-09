@@ -68,7 +68,6 @@ function selector(name,
 	}
 
 	function prepareEncode(object, parseTree, { bigEndian }) {
-
 		// To update size field we have to actually encode the object
 		// because size is probably dynamic
 		for (const { match, struct } of select) {

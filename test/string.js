@@ -1,6 +1,5 @@
 const test = require('ava');
-const { parse, encode, template, binString, uint8, asciiFloat, asciiInteger } = require('../index');
-const { compareTemplate } = require('../src/helper.js');
+const { parse, encode, binString, uint8, asciiFloat, asciiInteger } = require('../index');
 
 test('string_fixed', (t) => {
 	const definition = [binString('str', { size: 12 })];

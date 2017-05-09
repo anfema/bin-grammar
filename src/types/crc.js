@@ -227,4 +227,5 @@ module.exports = {
 	crc8,
 	crc81Wire,
 	crc8XOR,
-}
+};
+

@@ -53,7 +53,7 @@ function binString(name,
 			let end = size + offset;
 
 			if (nullTerminated) {
-				for(let i = offset; i < size + offset; i += 1) {
+				for (let i = offset; i < size + offset; i += 1) {
 					if (buffer[i] === 0x00) {
 						end = i;
 						break;
@@ -70,7 +70,7 @@ function binString(name,
 			let end = buffer.length;
 			let sz = size;
 
-			for(let i = 0; i < buffer.length; i += 1) {
+			for (let i = 0; i < buffer.length; i += 1) {
 				if (buffer[i] === 0x00) {
 					end = i;
 					sz = end + 1;

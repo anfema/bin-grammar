@@ -13,7 +13,6 @@ const definition = [
 	}),
 ];
 
-
 test('selector_1', (t) => {
 	const buffer = Buffer.from('0048656C6C6F20576F726C642100', 'hex');
 	const result = parse(definition, buffer);

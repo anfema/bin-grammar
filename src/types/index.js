@@ -1,3 +1,5 @@
+/* eslint-disable object-property-newline */
+
 const { binary, bcd } = require('./binary');
 const bitMask = require('./bitmask');
 const { bitStruct, bitFlag, bitInt, bitUInt, bitEnum, bitBitMask } = require('./bitstruct');

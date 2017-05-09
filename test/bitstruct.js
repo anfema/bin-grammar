@@ -33,7 +33,18 @@ test('bit_flags', (t) => {
 	const encoded = encode(definition, result);
 
 	t.is(encoded.compare(buffer), 0);
-	t.is(compareTemplate(template(definition), { bit: { bit1: null, bit2: null, bit3: null, bit4: null, bit5: null, bit6: null, bit7: null, bit8: null } }), true);
+	t.is(compareTemplate(template(definition), {
+		bit: {
+			bit1: null,
+			bit2: null,
+			bit3: null,
+			bit4: null,
+			bit5: null,
+			bit6: null,
+			bit7: null,
+			bit8: null,
+		},
+	}), true);
 });
 
 test('bit_int', (t) => {
@@ -139,7 +150,6 @@ test('bit_bitmask', (t) => {
 	t.is(encoded.compare(buffer), 0);
 	t.is(compareTemplate(template(definition), { bit: { int1: null, mask: null } }), true);
 });
-
 
 test('bit_integration', (t) => {
 	const definition = [

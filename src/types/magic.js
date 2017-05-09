@@ -29,6 +29,7 @@ function magic(name,
 
 		// string and buffer need different comparison methods
 		let valid = false;
+
 		if (value instanceof Buffer) {
 			valid = (value.compare(data) === 0);
 		} else {

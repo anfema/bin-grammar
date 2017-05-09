@@ -24,7 +24,7 @@ function bitmask(name,
 		}
 
 		// determine which bits have been set
-		for (let key of Object.keys(bitfield)) {
+		for (const key of Object.keys(bitfield)) {
 			const val = bitfield[key];
 
 			if (value & 1 << (size * 8 - val - 1)) {

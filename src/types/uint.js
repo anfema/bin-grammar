@@ -37,9 +37,9 @@ function uint(name,
 			value: transform(value),
 			size,
 		};
-	};
+	}
 
-	function prepareEncode(object, parseTree, { bigEndian }) { }
+	function prepareEncode(object, parseTree, { bigEndian: inheritBigEndian }) { }
 
 	function encode(object, { bigEndian: inheritBigEndian }) {
 		const data = Buffer.alloc(size);

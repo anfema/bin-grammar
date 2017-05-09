@@ -32,12 +32,10 @@ function float(name,
 			} else {
 				value = buffer.readDoubleBE();
 			}
+		} else if (size === 4) {
+			value = buffer.readFloatLE();
 		} else {
-			if (size === 4) {
-				value = buffer.readFloatLE();
-			} else {
-				value = buffer.readDoubleLE();
-			}
+			value = buffer.readDoubleLE();
 		}
 
 		return {
@@ -46,7 +44,7 @@ function float(name,
 		};
 	}
 
-	function prepareEncode(object, parseTree, { bigEndian }) {
+	function prepareEncode(object, parseTree, { bigEndian: inheritBigEndian }) {
 	}
 
 	function encode(object, { bigEndian: inheritBigEndian }) {
@@ -64,12 +62,10 @@ function float(name,
 			} else {
 				buffer.writeDoubleBE(value, 0);
 			}
+		} else if (size === 4) {
+			buffer.writeFloatLE(value, 0);
 		} else {
-			if (size === 4) {
-				buffer.writeFloatLE(value, 0);
-			} else {
-				buffer.writeDoubleLE(value, 0);
-			}
+			buffer.writeDoubleLE(value, 0);
 		}
 
 		return buffer;

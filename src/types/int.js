@@ -51,7 +51,7 @@ function int(name,
 		};
 	}
 
-	function prepareEncode(object, parseTree, { bigEndian }) {
+	function prepareEncode(object, parseTree, { bigEndian: inheritBigEndian }) {
 	}
 
 	function encode(object, { bigEndian: inheritBigEndian }) {
