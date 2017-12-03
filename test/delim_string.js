@@ -32,7 +32,7 @@ test('delimstring_parse_string_delimiter_should_parse_an_inclusive_string', (t) 
     t.is(result.foo, "Hello World!\r\n");
 });
 
-test('delimstring_parse_string_delimiter_should_parse_an_exclusive_string,_with_detritus', (t) => {
+test('delimstring_parse_string_delimiter_should_parse_an_exclusive_string_with_detritus', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!";
     var g = [
         delimString('foo', {
@@ -47,7 +47,7 @@ test('delimstring_parse_string_delimiter_should_parse_an_exclusive_string,_with_
     t.is(result.foo, "Hello World!");
 });
 
-test('delimstring_parse_string_delimiter_should_parse_an_inclusive_string,_with_detritus', (t) => {
+test('delimstring_parse_string_delimiter_should_parse_an_inclusive_string_with_detritus', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!";
     var g = [
         delimString('foo', {
@@ -62,7 +62,7 @@ test('delimstring_parse_string_delimiter_should_parse_an_inclusive_string,_with_
     t.is(result.foo, "Hello World!\r\n");
 });
 
-test('delimstring_parse_string_delimiter_should_parse_an_exclusive_string,_followed_by_another_string', (t) => {
+test('delimstring_parse_string_delimiter_should_parse_an_exclusive_string_followed_by_another_string', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!\r\n";
     var g = [
         delimString('foo', {
@@ -77,7 +77,7 @@ test('delimstring_parse_string_delimiter_should_parse_an_exclusive_string,_follo
     t.is(result.foo, "Hello World!");
 });
 
-test('delimstring_parse_string_delimiter_should_parse_an_inclusive_string,_followed_by_another_string', (t) => {
+test('delimstring_parse_string_delimiter_should_parse_an_inclusive_string_followed_by_another_string', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!\r\n";
     var g = [
         delimString('foo', {
@@ -167,7 +167,7 @@ test('delimstring_parse_buffer_delimiter_should_parse_an_inclusive_string', (t) 
     t.is(result.foo, "Hello World!\r\n");
 });
 
-test('delimstring_parse_buffer_delimiter_should_parse_an_exclusive_string,_with_detritus', (t) => {
+test('delimstring_parse_buffer_delimiter_should_parse_an_exclusive_string_with_detritus', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!";
     var g = [
         delimString('foo', {
@@ -182,7 +182,7 @@ test('delimstring_parse_buffer_delimiter_should_parse_an_exclusive_string,_with_
     t.is(result.foo, "Hello World!");
 });
 
-test('delimstring_parse_buffer_delimiter_should_parse_an_inclusive_string,_with_detritus', (t) => {
+test('delimstring_parse_buffer_delimiter_should_parse_an_inclusive_string_with_detritus', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!";
     var g = [
         delimString('foo', {
@@ -197,7 +197,7 @@ test('delimstring_parse_buffer_delimiter_should_parse_an_inclusive_string,_with_
     t.is(result.foo, "Hello World!\r\n");
 });
 
-test('delimstring_parse_buffer_delimiter_should_parse_an_exclusive_string,_followed_by_another_string', (t) => {
+test('delimstring_parse_buffer_delimiter_should_parse_an_exclusive_string_followed_by_another_string', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!\r\n";
     var g = [
         delimString('foo', {
@@ -212,7 +212,7 @@ test('delimstring_parse_buffer_delimiter_should_parse_an_exclusive_string,_follo
     t.is(result.foo, "Hello World!");
 });
 
-test('delimstring_parse_buffer_delimiter_should_parse_an_inclusive_string,_followed_by_another_string', (t) => {
+test('delimstring_parse_buffer_delimiter_should_parse_an_inclusive_string_followed_by_another_string', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!\r\n";
     var g = [
         delimString('foo', {
@@ -301,7 +301,7 @@ test('delimstring_parse_array_delimiter_should_parse_an_inclusive_string', (t) =
     t.is(result.foo, "Hello World!\r\n");
 });
 
-test('delimstring_parse_array_delimiter_should_parse_an_exclusive_string,_with_detritus', (t) => {
+test('delimstring_parse_array_delimiter_should_parse_an_exclusive_string_with_detritus', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!";
     var g = [
         delimString('foo', {
@@ -316,7 +316,7 @@ test('delimstring_parse_array_delimiter_should_parse_an_exclusive_string,_with_d
     t.is(result.foo, "Hello World!");
 });
 
-test('delimstring_parse_array_delimiter_should_parse_an_inclusive_string,_with_detritus', (t) => {
+test('delimstring_parse_array_delimiter_should_parse_an_inclusive_string_with_detritus', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!";
     var g = [
         delimString('foo', {
@@ -331,7 +331,7 @@ test('delimstring_parse_array_delimiter_should_parse_an_inclusive_string,_with_d
     t.is(result.foo, "Hello World!\r\n");
 });
 
-test('delimstring_parse_array_delimiter_should_parse_an_exclusive_string,_followed_by_another_string', (t) => {
+test('delimstring_parse_array_delimiter_should_parse_an_exclusive_string_followed_by_another_string', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!\r\n";
     var g = [
         delimString('foo', {
@@ -346,7 +346,7 @@ test('delimstring_parse_array_delimiter_should_parse_an_exclusive_string,_follow
     t.is(result.foo, "Hello World!");
 });
 
-test('delimstring_parse_array_delimiter_should_parse_an_inclusive_string,_followed_by_another_string', (t) => {
+test('delimstring_parse_array_delimiter_should_parse_an_inclusive_string_followed_by_another_string', (t) => {
     var s = "Hello World!\r\nBadgers are ferocious!\r\n";
     var g = [
         delimString('foo', {
