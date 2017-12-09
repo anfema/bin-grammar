@@ -484,6 +484,26 @@ If no size is defined at all the parser just uses the rest of the buffer. You wi
 If no size is defined at all the string parser just uses the rest of the buffer. You will get an exception if the
 `sizeField` is defined but does not exist though.
 
+---
+
+- Type name: `delimString`
+- Parameters:
+	- `name`: Name of the field
+	- `options`: Options object
+- Options:
+	- `encoding`: the encoding to convert the buffer data to
+	- `delimiter`: string delimiter (default: `\r\n`)
+	- `inclusive`: include the delimiter in the string (default: `false`)
+	- `transform`: transform function applied before returning the string
+
+Parse strings separated by the given `delimiter`.
+If `inclusive` is TRUE, the delimiter is included in any parsed string. On encode, the string to be
+encoded must end with the delimiter.
+If `inclusive` is FALSE, the delimiter is not included in the parsed string but is silently consumed.
+On encode, input strings have the delimiter silently appended before they are encoded.
+If no size is defined at all the string parser just uses the rest of the buffer.
+
+
 ### Numbers
 
 #### Signed Integers
