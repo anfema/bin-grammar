@@ -497,9 +497,9 @@ If no size is defined at all the string parser just uses the rest of the buffer.
 	- `transform`: transform function applied before returning the string
 
 Parse strings separated by the given `delimiter`.
-If `inclusive` is TRUE, the delimiter is included in any parsed string. On encode, the string to be
+If `inclusive` is `true`, the delimiter is included in any parsed string. On encode, the string to be
 encoded must end with the delimiter.
-If `inclusive` is FALSE, the delimiter is not included in the parsed string but is silently consumed.
+If `inclusive` is `false`, the delimiter is not included in the parsed string but is silently consumed.
 On encode, input strings have the delimiter silently appended before they are encoded.
 If no size is defined at all the string parser just uses the rest of the buffer.
 
