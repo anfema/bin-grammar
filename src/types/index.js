@@ -12,6 +12,7 @@ const { uint, uint8, uint16, uint32 } = require('./uint');
 const loop = require('./loop');
 const selector = require('./selector');
 const { crc, crc32, crc24, crc16, crc16CCITT, crc16Modbus, crc16Kermit, crc16XModem, crc8, crc81Wire, crc8XOR } = require('./crc');
+const delimString = require('./delimString');
 
 // Why do i have to do this nonsense? -.-
 module.exports = {
@@ -27,4 +28,5 @@ module.exports = {
 	loop,
 	selector,
 	crc, crc32, crc24, crc16, crc16CCITT, crc16Modbus, crc16Kermit, crc16XModem, crc8, crc81Wire, crc8XOR,
+	delimString,
 };

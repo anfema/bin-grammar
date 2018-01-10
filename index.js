@@ -16,6 +16,7 @@ const {
 	loop,
 	selector,
 	crc, crc32, crc24, crc16, crc16CCITT, crc16Modbus, crc16Kermit, crc16XModem, crc8, crc81Wire, crc8XOR,
+	delimString,
 } = require('./src/types');
 
 module.exports = {
@@ -32,4 +33,5 @@ module.exports = {
 	loop,
 	selector,
 	crc, crc32, crc24, crc16, crc16CCITT, crc16Modbus, crc16Kermit, crc16XModem, crc8, crc81Wire, crc8XOR,
+	delimString,
 };
