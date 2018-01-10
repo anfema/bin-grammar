@@ -23,6 +23,10 @@ If you're using `yarn`:
 
 ## Changelog
 
+### 3.3.0
+
+- Add `delimString`, thanks [blowback](https://github.com/blowback)
+
 ### 3.2.0
 
 - Bugfix: CRC calculation failed (failed the test-suite too, how could this happen)
