@@ -211,7 +211,7 @@ test('endianness_parse', (t) => {
 		})
 	];
 
-	const buffer = Buffer.from('79314000cc9d325ea0ce325e00400840', 'hex');
+	const buffer = Buffer.from('79314000cc9d325ea0ce325e64888440', 'hex');
 	const result = parse(definition, buffer, { bigEndian: false });
 
 	t.is(result.first, 4206969);
@@ -219,9 +219,10 @@ test('endianness_parse', (t) => {
 	t.is(result.third, 1580388000);
 	t.is(result.struct.a, 1);
 	t.is(result.struct.b, 0);
-	t.is(result.struct.c, 2);
-	t.is(result.struct.d, 1);
-	t.is(result.struct.e, 0);
+	t.is(result.struct.c, 33);
+	t.is(result.struct.d, 2);
+	t.is(result.struct.e, 8);
+	t.is(result.struct.f, 100);
 });
 
 test('endianness_encode', (t) => {
@@ -249,13 +250,14 @@ test('endianness_encode', (t) => {
 		struct: {
 			a: 1,
 			b: 0,
-			c: 2,
-			d: 1,
-			e: 0
+			c: 33,
+			d: 2,
+			e: 8,
+			f: 100
 		}
 	};
 
 	const result = encode(definition, json, { bigEndian: false });
-	const expected = '79314000cc9d325ea0ce325e00400840';
+	const expected = '79314000cc9d325ea0ce325e64888440';
 	t.is(result.toString('hex'), expected);
 });
