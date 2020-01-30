@@ -1,5 +1,5 @@
 const test = require('ava');
-const { parse, encode, template, bitStruct, bitFlag, bitInt, bitUInt, bitEnum, bitBitMask } = require('../index');
+const { parse, encode, template, bitStruct, bitFlag, bitInt, bitUInt, bitEnum, bitBitMask, uint32 } = require('../index');
 const { compareTemplate } = require('../src/helper.js');
 
 test('bit_flags', (t) => {
@@ -191,4 +191,71 @@ test('bit_integration', (t) => {
 
 	t.is(encoded.compare(buffer), 0);
 	t.is(compareTemplate(template(definition), { bit: { int1: null, mask: null, flag: null, enum: null, int2: null } }), true);
+});
+
+test('endianness_parse', (t) => {
+	const definition = [
+		uint32('first'),
+		uint32('second'),
+		uint32('third'),
+		bitStruct('struct', {
+			size: 4,
+			elements: [
+				bitUInt('a', { size: 2 }),
+				bitUInt('b', { size: 2 }),
+				bitUInt('c', { size: 10 }),
+				bitUInt('d', { size: 4 }),
+				bitUInt('e', { size: 6 }),
+				bitUInt('f', { size: 8 })
+			]
+		})
+	];
+
+	const buffer = Buffer.from('79314000cc9d325ea0ce325e00400840', 'hex');
+	const result = parse(definition, buffer, { bigEndian: false });
+
+	t.is(result.first, 4206969);
+	t.is(result.second, 1580375500);
+	t.is(result.third, 1580388000);
+	t.is(result.struct.a, 1);
+	t.is(result.struct.b, 0);
+	t.is(result.struct.c, 2);
+	t.is(result.struct.d, 1);
+	t.is(result.struct.e, 0);
+});
+
+test('endianness_encode', (t) => {
+	const definition = [
+		uint32('first'),
+		uint32('second'),
+		uint32('third'),
+		bitStruct('struct', {
+			size: 4,
+			elements: [
+				bitUInt('a', { size: 2 }),
+				bitUInt('b', { size: 2 }),
+				bitUInt('c', { size: 10 }),
+				bitUInt('d', { size: 4 }),
+				bitUInt('e', { size: 6 }),
+				bitUInt('f', { size: 8 })
+			]
+		})
+	];
+
+	const json = {
+		first: 4206969,
+		second: 1580375500,
+		third: 1580388000,
+		struct: {
+			a: 1,
+			b: 0,
+			c: 2,
+			d: 1,
+			e: 0
+		}
+	};
+
+	const result = encode(definition, json, { bigEndian: false });
+	const expected = '79314000cc9d325ea0ce325e00400840';
+	t.is(result.toString('hex'), expected);
 });
