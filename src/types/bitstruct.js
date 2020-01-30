@@ -64,8 +64,13 @@ function bitStruct(name, {
 			offset += r.size;
 		}
 
+		// serialize
 		for (let i = 0; i < size; i += 1) {
-			result[i] = (accum >> ((size - i - 1) * 8)) & 0xff;
+			if (bigEndian) {
+				result[i] = (accum >> ((size - i - 1) * 8)) & 0xff;
+			} else {
+				result[i] = (accum >> (i * 8)) & 0xff;
+			}
 		}
 
 		return result;
