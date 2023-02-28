@@ -25,43 +25,46 @@ function binary(name,
 		reverseTransform = value => value,
 	} = {}
 ) {
+	let instanceSize = size;
+
 	function parse(buffer, parseTree, { bigEndian }) {
 		let offset = 0;
+		instanceSize = size;
 
 		// determine size to copy to result buffer
 		if (sizePrefixed) {
 			const { parse: prefixParser } = uint('prefix', { size: sizePrefixLength, bigEndian: sizePrefixBigEndian });
 			const result = prefixParser(buffer, {}, { bigEndian });
 
-			size = result.value;
+			instanceSize = result.value;
 			offset = result.size;
 		}
 		if (sizeField) {
-			size = sizeFieldTransform(parseTree[sizeField]);
+			instanceSize = sizeFieldTransform(parseTree[sizeField]);
 		}
-		if (size === undefined) {
-			size = buffer.length;
+		if (instanceSize === undefined) {
+			instanceSize = buffer.length;
 		}
 
 		// just copy data to result
-		const result = new Buffer(size);
+		const result = new Buffer(instanceSize);
 
-		buffer.copy(result, 0, offset, size + offset);
+		buffer.copy(result, 0, offset, instanceSize + offset);
 
 		// return result
 		return {
 			value: transform(result),
-			size: size + offset,
+			size: instanceSize + offset,
 		};
 	}
 
 	function prepareEncode(object, parseTree, { bigEndian }) {
 		if (size === undefined) {
-			size = object.length;
+			instanceSize = object.length;
 		}
 
 		if (sizeField) {
-			parseTree[sizeField] = sizeFieldReverseTransform(size);
+			parseTree[sizeField] = sizeFieldReverseTransform(instanceSize);
 		}
 	}
 
@@ -74,21 +77,21 @@ function binary(name,
 			const result = prefixEncoder(transformed.length, { bigEndian });
 
 			bufferItems.unshift(result);
-			size = transformed.length + sizePrefixLength;
+			instanceSize = transformed.length + sizePrefixLength;
 		}
-		if (size === undefined) {
-			size = transformed.length;
+		if (instanceSize === undefined) {
+			instanceSize = transformed.length;
 		}
 
 		// build buffer
 		let data = Buffer.concat(bufferItems);
 
-		if (data.length < size) {
+		if (data.length < instanceSize) {
 			// if the buffer was shorter than anticipated, pad with zeroes
-			data = Buffer.concat([data, Buffer.alloc(size - data.length)]);
-		} else if (data.length > size) {
+			data = Buffer.concat([data, Buffer.alloc(instanceSize - data.length)]);
+		} else if (data.length > instanceSize) {
 			// if the buffer was longer just cut it off
-			data = data.slice(0, size);
+			data = data.slice(0, instanceSize);
 		}
 
 		return data;
