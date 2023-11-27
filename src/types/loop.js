@@ -2,12 +2,21 @@ const { uint } = require('./uint');
 
 // Loop over a sub-struct
 //
+// Each iteration of the loop accesses its own context, which is initially
+// empty apart from '_index', '_repetitions' and '_context'.
+//
 // struct: the structure that repeats
 // repetitionsPrefixed: this loop is prefixed with a repetition count
 // repetitionsPrefixLength: size of the prefix
 // repetitionsBigEndian: override endianness of size prefix
 // repetitions: how often the sub-struct repeats, defaults to Infinity
 // repetitionsField: field in the parse tree that defines the repetition count
+// contextField: field in the parse tree that is passed to each loop iteration
+//               as '_context', along with '_index' and '_repetitions'.
+// contextFieldTransform: passed two params, an object from the loop state
+//               and the current loop index
+// contextFieldReverseTransform: passed two params, an object from the loop state
+//               and the current loop index
 //
 // returns: parser function that returns array of parsed items
 function loop(name,
@@ -18,6 +27,8 @@ function loop(name,
 		repetitionsPrefixed = false,
 		repetitionsPrefixLength = 0,
 		repetitionsBigEndian,
+		contextField,
+		contextFieldTransform = (value, idx) => value,
 	}
 ) {
 	function parse(buffer, parseTree, { bigEndian: inheritBigEndian }) {
@@ -44,10 +55,15 @@ function loop(name,
 
 		// run the loop for the defined sub-struct
 		const result = [];
+		const ctx = parseTree[contextField];
 
 		for (let i = 0; i < repetitions; i += 1) {
 			const data = buffer.slice(offset, buffer.length);
-			const loopResult = {};
+			const loopResult = {
+				'_index': i,
+				'_repetitions': repetitions,
+				'_context' : contextFieldTransform(ctx, i),
+			};
 			let parserOffset = 0;
 
 			// loop over items in the sub struct
@@ -58,6 +74,10 @@ function loop(name,
 				loopResult[itemName] = r.value;
 				parserOffset += r.size;
 			}
+
+			delete loopResult['_index'];
+			delete loopResult['_repetitions'];
+			delete loopResult['_context'];
 
 			result.push(loopResult);
 			offset += parserOffset;
@@ -83,6 +103,10 @@ function loop(name,
 		if (repetitionsField) {
 			parseTree[repetitionsField] = repetitions;
 		}
+
+		if(contextField) {
+			object['_context'] = parseTree[contextField];
+		}
 	}
 
 	function encode(object, { bigEndian }) {
@@ -98,7 +122,13 @@ function loop(name,
 			parts.push(result);
 		}
 
+		let i = 0;
+
 		for (const loopObject of object) {
+			loopObject['_index'] = i;
+			loopObject['_repetitions'] = repetitions;
+			loopObject['_context'] = contextFieldTransform(object['_context'], i);
+
 			for (const { prepareEncode: itemPrepareEncode, name: itemName } of struct) {
 				const data = loopObject[itemName];
 
@@ -111,6 +141,7 @@ function loop(name,
 
 				parts.push(result);
 			}
+			i += 1;
 		}
 
 		return Buffer.concat(parts);
