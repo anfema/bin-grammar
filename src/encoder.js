@@ -1,7 +1,7 @@
 // Encode a binary buffer
 //
 // definition: array of type parser functions
-// objcet: object to encode to buffer
+// object: object to encode to buffer
 // options:
 //  - `bigEndian`: default endianness of encoder (default: `true`)
 function encode(definition, object, { bigEndian = true } = {}) {
